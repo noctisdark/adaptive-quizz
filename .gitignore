@@ -1,0 +1,7 @@
+node_modules/
+__pycache__/
+node_modules
+/build
+/*.log
+
+# should we also include the db ?

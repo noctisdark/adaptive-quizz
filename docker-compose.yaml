@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  api:
+    build: ./api
+    volumes:
+      - ./api:/api
+    environment:
+      - FLASK_APP=/api/src/main.py
+      - DB_SECRET_KEY=123456789
+      - DEBUG=true # Only needs to be defined
+    ports:
+      - 5000:5000
+
+  front:
+    build: ./front
+    volumes:
+      - ./front:/front
+    environment:
+      - PATH=$PATH:/front/node_modules/.bin/
+      - NODE_OPTIONS="--openssl-legacy-provider"
+    ports:
+      - 3000:3000
+    depends_on:
+      - api
+    

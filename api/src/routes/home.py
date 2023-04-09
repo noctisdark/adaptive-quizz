@@ -2,4 +2,4 @@ from base import app
 
 @app.route('/')
 def home():
-  return "Hello, checkout /users"
+  return "Hello, checkout /users and /quizzes"

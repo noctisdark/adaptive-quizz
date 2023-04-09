@@ -11,7 +11,7 @@ class User(db.Model):
   username = db.Column(db.String(50))
   password = db.Column(db.String(64))
 
-# Create table it it donesn't exist
+# Create table if it doesn't exist
 with app.app_context():
   User.__table__.create(db.engine, checkfirst=True)
   
@@ -41,7 +41,7 @@ def register(creds):
   new_user = User(username=creds['username'], password=creds['password'])
   db.session.add(new_user)
   db.session.commit()
-  
+
   # this must be bad
   jwt_duration = jwt_duration = datetime.timedelta(days=7) if creds['rememberMe'] else datetime.timedelta(minutes=45)
   encoded_jwt = jwt.encode(

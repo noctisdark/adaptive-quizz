@@ -1,9 +1,13 @@
-import { getLocalJSON, useLocalStorage } from "./localStorage";
+import parseJWT from "utils/parseJWT";
 
-export const useSession = () => useLocalStorage("session");
+import { getLocal, useLocalStorage } from "./localStorage";
 
-export const authenticated = (session = getLocalJSON("session")) =>
-  session && session.expires_at < Date.now();
+export const authenticated = (jwt = getLocal("jwt")) =>
+  jwt && parseJWT(jwt).exp * 1000 > Date.now();
 
-export const localJWT = (session = getLocalJSON("session")) =>
-  authenticated(session) && session.jwt;
+// ignore if invalid
+export const localJWT = (jwt = getLocal("jwt")) =>
+  authenticated(jwt) && jwt;
+
+export const useJWT = () =>
+  useLocalStorage("jwt", { invalidateIf: (jwt) => !authenticated });

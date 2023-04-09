@@ -30,20 +30,17 @@ const Form = ({ type, onSubmit }) => {
   const title = type === "login" ? "Welcome back" : "Welcome";
   const submitTitle = type === "login" ? "Login" : "Register";
 
+  const isValid = username.length >= 4 && password.length >= 8;
+
   const togglePasswordVisibility = () => setPasswordVisible(!passwordVisible);
-  const cancel = e => e.preventDefault();
+  const cancel = (e) => e.preventDefault();
 
   return (
     <Box width="100%" maxWidth={600}>
       <Heading as="h3" paddingBottom="40px" textAlign="center">
         {title}
       </Heading>
-      <Stack
-        as="form"
-        spacing={8}
-        width="100%"
-        onSubmit={cancel}
-      >
+      <Stack as="form" spacing={8} width="100%" onSubmit={cancel}>
         <FormControl isRequired>
           <FormLabel>Username</FormLabel>
           <InputGroup>
@@ -94,6 +91,7 @@ const Form = ({ type, onSubmit }) => {
         </Box>
 
         <Button
+          isDisabled={!isValid}
           type="submit"
           colorScheme="telegram"
           onClick={() => onSubmit({ username, password, rememberMe })}
@@ -104,7 +102,7 @@ const Form = ({ type, onSubmit }) => {
 
       <Divider margin="12px 0" />
 
-      {type === "login" && (
+      {type === "login" ? (
         <Link
           as={RouterLink}
           color="teal.500"
@@ -112,7 +110,17 @@ const Form = ({ type, onSubmit }) => {
           display="block"
           textAlign="center"
         >
-          New here ? Register.
+          New ? Register here.
+        </Link>
+      ) : (
+        <Link
+          as={RouterLink}
+          color="teal.500"
+          to="/auth"
+          display="block"
+          textAlign="center"
+        >
+          I already have an account.
         </Link>
       )}
     </Box>

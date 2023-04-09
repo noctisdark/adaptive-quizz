@@ -7,7 +7,7 @@ services:
       - ./api:/api
     environment:
       - FLASK_APP=/api/src/main.py
-      - DB_SECRET_KEY=123456789
+      - SECRET_KEY=929faab4edce0be7cdfdf935899ffcac
       - DEBUG=true # Only needs to be defined
     ports:
       - 5000:5000

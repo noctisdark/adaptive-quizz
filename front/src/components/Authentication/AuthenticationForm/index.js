@@ -1,6 +1,11 @@
-import { Route, Routes } from "react-router-dom";
 import styled from "@emotion/styled";
-import { Box, Stack } from "@chakra-ui/react";
+import { Route, Routes } from "react-router-dom";
+import { Box, Stack, useColorMode, useToast } from "@chakra-ui/react";
+
+import hash from "utils/hash";
+import history from "providers/RouterProvider/history";
+import { useJWT } from "hooks/authentication";
+import { login, register } from "api/auth";
 
 import AppIntro from "./AppIntro";
 import Form from "./Form";
@@ -15,18 +20,64 @@ const Section = styled(Box)`
 `;
 
 const AuthenticationForm = () => {
-  const onLogin = ({ username, password, rememberMe }) => {
-    console.log("login", username, password, rememberMe);
+  const [, saveJWT] = useJWT();
+  const toast = useToast();
+  // why not ?
+  const { colorMode } = useColorMode();
+
+  const redirectHome = () =>
+    setTimeout(() => {
+      history.push("/home");
+    }, 3000);
+
+  const onRegister = async ({ username, password, rememberMe }) => {
+    password = await hash(password);
+    try {
+      const result = await register({ username, password, rememberMe });
+      saveJWT(result.data);
+      toast({
+        title: "Registered.",
+        description: "Thank you for believing in our service, redirecting...",
+        status: "success",
+        duration: 3000,
+      });
+      redirectHome();
+    } catch ({ response: { data } }) {
+      toast({
+        title: "Error.",
+        description: data || "Unexpected error",
+        status: "error",
+        duration: 10000,
+      });
+    }
   };
 
-  const onRegister = ({ username, password, rememberMe }) => {
-    console.log("register", username, password, rememberMe);
+  const onLogin = async ({ username, password, rememberMe }) => {
+    password = await hash(password);
+    try {
+      const result = await login({ username, password, rememberMe });
+      saveJWT(result.data);
+      toast({
+        title: "Logged in.",
+        description: "Thank you for believing in our service, redirecting...",
+        status: "success",
+        duration: 3000,
+      });
+      redirectHome();
+    } catch ({ response: { data } }) {
+      toast({
+        title: "Error.",
+        description: data || "Unexpected error",
+        status: "error",
+        duration: 10000,
+      });
+    }
   };
 
   return (
     <Stack direction="row" height="100vh" width="100vw" spacing={0}>
       <Section
-        backgroundColor="gray.100"
+        backgroundColor={colorMode === "light" ? "gray.100" : "gray.900"}
         borderTopRightRadius="8px"
         borderBottomRightRadius="8px"
       >

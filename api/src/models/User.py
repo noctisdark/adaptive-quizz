@@ -24,11 +24,14 @@ with app.app_context():
 # This builds a queries similar to : SELECT * FROM users WHERE id == 0
 
 # Define public queries and more complex methods
+def to_dict(user):
+  return {"id": user.id, "username": user.username}
+
 def all():
   users = User.query.all()
   user_list = []
   for user in users:
-    user_dict = {"id": user.id, "username": user.username}
+    user_dict = to_dict(user)
     user_list.append(user_dict)
   return {"error": None, "users": user_list}
 

@@ -7,16 +7,16 @@ import history from "providers/RouterProvider/history";
 import AuthenticationForm from "components/Authentication/AuthenticationForm";
 
 const AdaptiveQuiz = () => (
-  <React.StrictMode>
-    <UIProvider>
-      <RouterProvider history={history}>
+  <RouterProvider history={history}>
+    <React.StrictMode>
+      <UIProvider>
         <Routes>
-          <Route path="/auth" Component={AuthenticationForm} />
+          <Route path="/auth/*" Component={AuthenticationForm} />
           <Route path="/" element={"Hello world"} />
         </Routes>
-      </RouterProvider>
-    </UIProvider>
-  </React.StrictMode>
+      </UIProvider>
+    </React.StrictMode>
+  </RouterProvider>
 );
 
 export default AdaptiveQuiz;

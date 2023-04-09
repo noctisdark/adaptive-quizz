@@ -1,6 +1,12 @@
 import styled from "@emotion/styled";
 import { Route, Routes } from "react-router-dom";
-import { Box, Stack, useColorMode, useToast } from "@chakra-ui/react";
+import {
+  Box,
+  Stack,
+  useBreakpointValue,
+  useColorMode,
+  useToast,
+} from "@chakra-ui/react";
 
 import hash from "utils/hash";
 import history from "providers/RouterProvider/history";
@@ -16,12 +22,17 @@ const Section = styled(Box)`
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  padding: 40px;
+  padding: 10px 40px;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    height: 100%;
+  }
 `;
 
 const AuthenticationForm = () => {
   const [, saveJWT] = useJWT();
   const toast = useToast();
+
   // why not ?
   const { colorMode } = useColorMode();
 
@@ -74,8 +85,18 @@ const AuthenticationForm = () => {
     }
   };
 
+  const stackStyles = useBreakpointValue({
+    base: {
+      flexDirection: "column-reverse",
+      height: "200vh",
+    },
+    md: {
+      flexDirection: "row",
+    },
+  });
+
   return (
-    <Stack direction="row" height="100vh" width="100vw" spacing={0}>
+    <Stack style={stackStyles} height="100vh" width="100vw" spacing={0}>
       <Section
         backgroundColor={colorMode === "light" ? "gray.100" : "gray.900"}
         borderTopRightRadius="8px"

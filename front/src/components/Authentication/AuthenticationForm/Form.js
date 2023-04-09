@@ -36,7 +36,7 @@ const Form = ({ type, onSubmit }) => {
   const cancel = (e) => e.preventDefault();
 
   return (
-    <Box width="100%" maxWidth={600}>
+    <Box width="min(100%, 560px)">
       <Heading as="h3" paddingBottom="40px" textAlign="center">
         {title}
       </Heading>

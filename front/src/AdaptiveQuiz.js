@@ -4,10 +4,12 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import UIProvider from "providers/UIProvider";
 import RouterProvider from "providers/RouterProvider/index";
 import history from "providers/RouterProvider/history";
-import AuthenticationForm from "components/Authentication/AuthenticationForm";
-import { authenticated } from "hooks/authentication";
 
+import AuthenticationForm from "components/Authentication/AuthenticationForm";
+import Home from "components/Home";
 import When from "components/basics/When";
+
+import { authenticated } from "hooks/authentication";
 
 const AdaptiveQuiz = () => (
   <React.StrictMode>
@@ -29,7 +31,7 @@ const AdaptiveQuiz = () => (
             element={
               <When
                 predicate={() => authenticated()}
-                then="Home sweet home !"
+                then={<Home />}
                 otherwise={<Navigate to="/auth" />}
               />
             }

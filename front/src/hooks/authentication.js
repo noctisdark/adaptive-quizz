@@ -10,4 +10,4 @@ export const localJWT = (jwt = getLocal("jwt")) =>
   authenticated(jwt) && jwt;
 
 export const useJWT = () =>
-  useLocalStorage("jwt", { invalidateIf: (jwt) => !authenticated });
+  useLocalStorage("jwt", { invalidateIf: (jwt) => !authenticated() });

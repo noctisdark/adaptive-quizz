@@ -39,7 +39,7 @@ const AuthenticationForm = () => {
   const redirectHome = () =>
     setTimeout(() => {
       history.push("/home");
-    }, 3000);
+    }, 1000);
 
   const onRegister = async ({ username, password, rememberMe }) => {
     password = await hash(password);
@@ -48,9 +48,9 @@ const AuthenticationForm = () => {
       saveJWT(result.data);
       toast({
         title: "Registered.",
-        description: "Thank you for believing in our service, redirecting...",
+        description: "Welcome back, redirecting...",
         status: "success",
-        duration: 3000,
+        duration: 1000,
       });
       redirectHome();
     } catch ({ response: { data } }) {
@@ -58,7 +58,7 @@ const AuthenticationForm = () => {
         title: "Error.",
         description: data || "Unexpected error",
         status: "error",
-        duration: 10000,
+        duration: 5000,
       });
     }
   };
@@ -70,9 +70,9 @@ const AuthenticationForm = () => {
       saveJWT(result.data);
       toast({
         title: "Logged in.",
-        description: "Thank you for believing in our service, redirecting...",
+        description: "Welcome back, redirecting...",
         status: "success",
-        duration: 3000,
+        duration: 1000,
       });
       redirectHome();
     } catch ({ response: { data } }) {
@@ -80,20 +80,23 @@ const AuthenticationForm = () => {
         title: "Error.",
         description: data || "Unexpected error",
         status: "error",
-        duration: 10000,
+        duration: 5000,
       });
     }
   };
 
-  const stackStyles = useBreakpointValue({
-    base: {
-      flexDirection: "column-reverse",
-      height: "200vh",
+  const stackStyles = useBreakpointValue(
+    {
+      base: {
+        flexDirection: "column-reverse",
+        height: "200vh",
+      },
+      md: {
+        flexDirection: "row",
+      },
     },
-    md: {
-      flexDirection: "row",
-    },
-  });
+    { ssr: false }
+  );
 
   return (
     <Stack style={stackStyles} height="100vh" width="100vw" spacing={0}>

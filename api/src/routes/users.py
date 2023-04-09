@@ -1,4 +1,5 @@
 from base import app
+from base.jwt import token_required
 from flask import request, jsonify
 from models import User
 
@@ -31,3 +32,9 @@ def login_user():
     return jsonify(jwt), 200
   else:
     return jsonify(result["error"]), 400
+
+@app.route('/users/me', methods=['POST'])
+@token_required
+def get_user_data(current_user):
+  
+  return jsonify(User.to_dict(current_user)), 200

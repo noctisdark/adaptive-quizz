@@ -12,16 +12,22 @@ export const useLocalStorage = (
   { then = null, invalidateIf = () => false }
 ) => {
   let savedValue = getLocal(key, then);
+  const [, setValue] = useState();
+  const invalidate = () => {
+    deleteLocal(key);
+    setValue(null);
+  };
+
+  // avoid setting state immediately
   if (invalidateIf(savedValue)) {
     deleteLocal(key);
     savedValue = null;
   }
 
-  const [data, setData] = useState(savedValue);
-  const setAndSaveData = (newData) => {
-    saveLocal(key, newData);
-    setData(newData);
+  const setAndSaveValue = (newValue) => {
+    saveLocal(key, newValue);
+    setValue(newValue);
   };
 
-  return [data, setAndSaveData];
+  return [savedValue, setAndSaveValue, invalidate];
 };

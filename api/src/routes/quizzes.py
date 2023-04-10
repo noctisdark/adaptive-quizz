@@ -1,5 +1,5 @@
 from base import app
-from flask import jsonify, request
+from flask import jsonify, request, redirect, url_for
 from models import Quizz
 
 
@@ -19,6 +19,8 @@ def add_quizz():
   answer = request.form["answer"]
   difficulty = request.form["difficulty"]
   quizz = Quizz.Quizz(question, answer, difficulty)
+  if not quizz:
+    return {"error": "Quizz not found"}, 400
   return jsonify(Quizz.db_add_quizz(quizz)), 200
 
 
@@ -26,7 +28,27 @@ def add_quizz():
 def del_quizz():
   id = request.form["id"]
   quizz = Quizz.Quizz.query.get(id)
+  if not quizz:
+    return {"error": "Quizz not found"}, 400
   return jsonify(Quizz.db_del_quizz(quizz)), 200
 
 
+@app.route("/quizz/ask/<int:id>", methods=["GET"])
+def ask_quizz(id):
+  quizz = Quizz.Quizz.query.get(id)
+  if not quizz:
+    return {"error": "Quizz not found"}, 400
+  dict = Quizz.quizz_to_dict(quizz)
+  del dict["answer"]
+  return jsonify({"error": None, "quizz": dict}), 200
 
+
+@app.route("/quizz/answer/<int:id>", methods=["POST"])
+def answer_quizz(id):
+  quizz = Quizz.Quizz.query.get(id)
+  answer = request.form["answer"]
+  result = Quizz.transition(quizz, answer)
+  if result["error"]:
+    return jsonify(result["error"]), 400
+  else:
+    return redirect(url_for("ask_quizz", id=result["quizz"]["id"]))

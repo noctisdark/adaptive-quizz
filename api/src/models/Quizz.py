@@ -36,11 +36,17 @@ def all():
 
 def harder_than(difficulty):
   quizzes = Quizz.query.filter(Quizz.difficulty >= difficulty)
-  return {"error": None, "quizz": quizz_to_dict(random.choice(quizzes))}
+  quizz = random.choice(list(quizzes))
+  if not quizz:
+    return {"error": "Quizz Not Found"}
+  return {"error": None, "quizz": quizz_to_dict(quizz)}
 
 def easier_than(difficulty):
   quizzes = Quizz.query.filter(Quizz.difficulty <= difficulty)
-  return {"error": None, "quizz": quizz_to_dict(random.choice(quizzes))}
+  quizz = random.choice(list(quizzes))
+  if not quizz:
+    return {"error": "Quizz Not Found"}
+  return {"error": None, "quizz": quizz_to_dict(quizz)}
 
 def transition(quizz, answer):
   iscorrect = quizz.answer == answer

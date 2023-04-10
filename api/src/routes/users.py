@@ -12,26 +12,25 @@ def get_users():
     users = result["users"]
     return jsonify(users), 200
   else:
-    return jsonify(result["error"]), 400
+    return result["error"], 400
 
 @app.route('/users/register', methods=['POST'])
 def register_user():
   result = User.register(request.json)
   if not result["error"]:
     jwt = result["jwt"]
-    return jsonify(jwt), 200
+    return jwt, 200
   else:
-    return jsonify(result["error"]), 400
+    return result["error"], 400
 
 @app.route('/users/login', methods=['POST'])
 def login_user():
-  print("LOGIN REQUEST")
   result = User.login(request.json)
   if not result["error"]:
     jwt = result["jwt"]
-    return jsonify(jwt), 200
+    return jwt, 200
   else:
-    return jsonify(result["error"]), 400
+    return result["error"], 400
 
 @app.route('/users/me', methods=['POST'])
 @token_required
@@ -42,7 +41,7 @@ def get_user_data(current_user):
 @token_required
 def upload_image(current_user):
   if "image" in request.files:
-    return jsonify(User.upload_image(current_user, request.files["image"])), 200
+    return User.upload_image(current_user, request.files["image"]), 200
   return "No image supplied", 400
 
 # Keep it simple for now

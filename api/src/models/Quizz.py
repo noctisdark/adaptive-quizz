@@ -11,6 +11,11 @@ class Quizz(db.Model):
   answer = db.Column(db.String(256))
   difficulty = db.Column(db.Integer)
 
+  def __init__(self, question, answer, difficulty):
+    self.question = question
+    self.answer = answer 
+    self.difficulty = difficulty
+
 # Create table if it doesn't exist
 with app.app_context():
   Quizz.__table__.create(db.engine, checkfirst=True)
@@ -43,3 +48,15 @@ def transition(quizz, answer):
     return harder_than(quizz.difficulty)
   else:
     return easier_than(quizz.difficulty)
+
+
+def db_add_quizz(quizz):
+  db.session.add(quizz)
+  db.session.commit()
+  return {"error": None}
+
+def db_del_quizz(quizz):
+  db.session.delete(quizz) 
+  db.session.commit()
+  return {"error": None}
+

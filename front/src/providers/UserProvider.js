@@ -2,11 +2,12 @@ import { createContext, useEffect, useContext, useState } from "react";
 import { useToast } from "@chakra-ui/react";
 
 import LoadingScreen from "components/basics/LoadingScreen";
+import ErrorScreen from "components/basics/ErrorScreen";
+import api from "api";
 import { useJWT } from "hooks/authentication";
 import { getCurrentUser } from "api/user";
 
 import history from "./RouterProvider/history";
-import ErrorScreen from "components/basics/ErrorScreen";
 
 const UserContext = createContext();
 
@@ -33,14 +34,19 @@ const UserProvider = ({ children }) => {
     setTimeout(() => history.replace(nextURL), 1000);
   };
 
+  const updateImage = (url) =>
+    setUser({ ...user, imageURL: api.defaults.baseURL + url });
+
   useEffect(() => {
     jwt &&
       (async () => {
         try {
-          const { data } = await getCurrentUser(jwt);
-          setUser(data);
+          const { data: user } = await getCurrentUser();
+          if (user.imageURL)
+            user.imageURL = api.defaults.baseURL + user.imageURL;
+          setUser(user);
         } catch (error) {
-          const reason = error.response.data;
+          const reason = error.response?.data || "Unexpected error.";
           setError(reason);
 
           logout({
@@ -62,6 +68,7 @@ const UserProvider = ({ children }) => {
     <UserContext.Provider
       value={{
         user,
+        updateImage,
         logout,
       }}
     >

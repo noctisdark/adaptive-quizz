@@ -27,7 +27,7 @@ const AdaptiveQuiz = () => (
             }
           />
           <Route
-            path="/home"
+            path="/home/*"
             element={
               <When
                 predicate={() => authenticated()}

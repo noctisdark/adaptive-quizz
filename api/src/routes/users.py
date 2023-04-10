@@ -35,6 +35,19 @@ def login_user():
 
 @app.route('/users/me', methods=['POST'])
 @token_required
-def get_user_data(current_user):
-  
+def get_user_data(current_user):  
   return jsonify(User.to_dict(current_user)), 200
+
+@app.route('/users/me/image', methods=['POST'])
+@token_required
+def upload_image(current_user):
+  if "image" in request.files:
+    return jsonify(User.upload_image(current_user, request.files["image"])), 200
+  return "No image supplied", 400
+
+# Keep it simple for now
+from flask import send_from_directory
+
+@app.route('/uploads/<path:filename>', methods=['GET'])
+def get_image(filename):
+  return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True)

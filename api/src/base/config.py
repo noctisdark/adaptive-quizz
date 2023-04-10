@@ -8,3 +8,4 @@ class Config:
   SQLALCHEMY_DATABASE_URI = 'sqlite:////api/data/db.sqlite'
   SQLALCHEMY_TRACK_MODIFICATIONS = development
   DEBUG = development
+  UPLOAD_FOLDER = "/api/data/uploads"

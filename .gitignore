@@ -28,3 +28,6 @@ node_modules
 /*.log
 
 # should we also include the db ?
+
+api/data/uploads/*
+!api/data/uploads/.gitkeep

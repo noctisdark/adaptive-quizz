@@ -1,5 +1,9 @@
+import { Routes, Route } from "react-router-dom";
 import { Button } from "@chakra-ui/react";
+
+import BasicLayout from "components/Layouts/BasicLayout";
 import Navigation from "components/Navigation";
+import Settings from "./Settings";
 
 import UserProvider, { useUser } from "providers/UserProvider";
 
@@ -17,8 +21,19 @@ const Home = () => {
   return (
     <UserProvider>
       <Navigation />
-      <Hello />
-      <LogoutButton />
+      <BasicLayout>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <>
+                <Hello /> <LogoutButton />
+              </>
+            }
+          />
+          <Route path="/settings" element={<Settings />} />
+        </Routes>
+      </BasicLayout>
     </UserProvider>
   );
 };

@@ -1,6 +1,10 @@
+import os
+from uuid import uuid4
 from base import app, db
+from sqlalchemy import text
 import datetime
 import jwt
+from werkzeug.utils import secure_filename
 
 # from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -10,6 +14,7 @@ class User(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   username = db.Column(db.String(50))
   password = db.Column(db.String(64))
+  image_url = db.Column(db.String(64))
 
 # Create table if it doesn't exist
 with app.app_context():
@@ -25,7 +30,7 @@ with app.app_context():
 
 # Define public queries and more complex methods
 def to_dict(user):
-  return {"id": user.id, "username": user.username}
+  return {"id": user.id, "username": user.username, "imageURL": user.image_url}
 
 def all():
   users = User.query.all()
@@ -69,3 +74,13 @@ def login(creds):
     app.config['SECRET_KEY'], "HS256"
   )
   return {"error": None, "jwt": encoded_jwt}
+
+def upload_image(current_user, file):
+  filename = str(uuid4()) + '_' + secure_filename(file.filename)
+  save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+  access_path = '/uploads/' + filename
+  file.save(save_path)
+  current_user.image_url = access_path
+  db.session.add(current_user);
+  db.session.commit()
+  return access_path

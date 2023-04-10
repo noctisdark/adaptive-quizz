@@ -5,12 +5,13 @@ import { localJWT } from "hooks/authentication";
 
 const instance = axios.create();
 
-// only valid in dev environments
-instance.defaults.baseURL = 'http://localhost:5000';
+// only valid in dev environments, !TODO!: use env variable
+instance.defaults.baseURL = "http://localhost:5000";
 
 instance.interceptors.request.use(
   (req) => {
-    req.headers["Content-Type"] = "application/json";
+    if (req.multipartFormData) req.headers["Content-Type"] = "multipart/form-data";
+    else req.headers["Content-Type"] = "application/json";
     return req;
   },
   (err) => Promise.reject(err)

@@ -26,11 +26,11 @@ const UserProvider = ({ children }) => {
       title,
       description,
       status,
-      duration: 3000,
+      duration: 1000,
     });
 
     invalidateJWT();
-    setTimeout(() => history.replace(nextURL), 3000);
+    setTimeout(() => history.replace(nextURL), 1000);
   };
 
   useEffect(() => {

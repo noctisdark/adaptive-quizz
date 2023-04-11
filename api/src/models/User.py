@@ -68,19 +68,46 @@ def login(creds):
     return {"error": "Incorrect password."} 
   
   # this must be bad
-  jwt_duration = jwt_duration = datetime.timedelta(days=7) if creds['rememberMe'] else datetime.timedelta(minutes=45)
+  jwt_duration = datetime.timedelta(days=7) if creds['rememberMe'] else datetime.timedelta(minutes=45)
   encoded_jwt = jwt.encode(
     {'id' : user.id, 'exp' : datetime.datetime.utcnow() + jwt_duration},
     app.config['SECRET_KEY'], "HS256"
   )
   return {"error": None, "jwt": encoded_jwt}
 
-def upload_image(current_user, file):
+def upload_image(user, file):
   filename = str(uuid4()) + '_' + secure_filename(file.filename)
   save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
   access_path = '/uploads/' + filename
   file.save(save_path)
-  current_user.image_url = access_path
-  db.session.add(current_user);
+  user.image_url = access_path
+  db.session.add(user);
   db.session.commit()
   return access_path
+
+def change_username(user, new_username):
+  duplicate_username = User.query.filter_by(username=new_username).first()
+  if duplicate_username:
+    return {"error": "Sorry, that username is already taken."}
+  user.username = new_username
+  db.session.add(user);
+  db.session.commit();
+  return {};
+
+def change_password(user, data):
+  user_exists = User.query.filter_by(username=user.username, password=data['oldPassword']).first()
+  if not user_exists:
+    return {"error": f"Incorrect password for user {user.username}."}
+
+  user.password = data['password']
+  db.session.add(user);
+  db.session.commit();
+  return {};
+
+def delete_account(user):
+  user_exists = User.query.filter_by(username=user.username).first()
+  if not user_exists:
+    return {"error": f"No user with username {user.username}."}
+  db.session.delete(user);
+  db.session.commit();
+  return {};

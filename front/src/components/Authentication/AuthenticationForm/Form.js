@@ -69,9 +69,7 @@ const Form = ({ type, onSubmit }) => {
                 aria-label="Toggle password visibility"
                 icon={passwordVisible ? <UnlockIcon /> : <LockIcon />}
                 onClick={togglePasswordVisibility}
-              >
-                Hello world
-              </IconButton>
+              />
             </InputRightAddon>
           </InputGroup>
         </FormControl>

@@ -6,7 +6,7 @@ import { WarningIcon, DownloadIcon } from "@chakra-ui/icons";
 import { LoadingOverlay } from "components/basics/Overlay";
 
 import { useUser } from "providers/UserProvider";
-import { uploadProfileImage } from "api/user";
+import { uploadProfileImage } from "api/users";
 
 const ProfileImageSection = () => {
   const {
@@ -24,7 +24,6 @@ const ProfileImageSection = () => {
   const onDrop = useCallback((acceptedFiles) => {
     const file = acceptedFiles[0];
     if (!file) return;
-    console.log(previewImageFile?.path, file.path)
     if (file.path === previewImageFile?.path) return;
 
     setPreviewImageFile(file);
@@ -71,7 +70,7 @@ const ProfileImageSection = () => {
       const reason = error.response?.data || "Unexpected error.";
       setError(reason);
 
-      if (err.response.code === 403) {
+      if (err.response.status === 403) {
         logout({
           status: "error",
           description: "You will be redirected to the authentication page",
@@ -125,7 +124,7 @@ const ProfileImageSection = () => {
       </Stack>
       <Button
         alignSelf="center"
-        colorScheme="green"
+        colorScheme="blue"
         leftIcon={<DownloadIcon />}
         isDisabled={!previewImageData || isUploading}
         onClick={startUpload}

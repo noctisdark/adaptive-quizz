@@ -5,7 +5,7 @@ import LoadingScreen from "components/basics/LoadingScreen";
 import ErrorScreen from "components/basics/ErrorScreen";
 import api from "api";
 import { useJWT } from "hooks/authentication";
-import { getCurrentUser } from "api/user";
+import { getCurrentUser } from "api/users";
 
 import history from "./RouterProvider/history";
 
@@ -36,6 +36,8 @@ const UserProvider = ({ children }) => {
 
   const updateImage = (url) =>
     setUser({ ...user, imageURL: api.defaults.baseURL + url });
+
+  const updateUsername = (username) => setUser({ ...user, username });
 
   useEffect(() => {
     jwt &&
@@ -69,6 +71,7 @@ const UserProvider = ({ children }) => {
       value={{
         user,
         updateImage,
+        updateUsername,
         logout,
       }}
     >

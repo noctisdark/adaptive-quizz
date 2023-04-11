@@ -37,6 +37,24 @@ def login_user():
 def get_user_data(current_user):  
   return jsonify(User.to_dict(current_user)), 200
 
+@app.route('/users/me/username', methods=['POST'])
+@token_required
+def change_username(current_user):
+  result = User.change_username(current_user, request.json)
+  if not "error" in result:
+    return "", 200
+  else:
+    return result["error"], 400
+  
+@app.route('/users/me/password', methods=['POST'])
+@token_required
+def change_password(current_user):
+  result = User.change_password(current_user, request.json)
+  if not "error" in result:
+    return "", 200
+  else:
+    return result["error"], 400
+
 @app.route('/users/me/image', methods=['POST'])
 @token_required
 def upload_image(current_user):
@@ -50,3 +68,12 @@ from flask import send_from_directory
 @app.route('/uploads/<path:filename>', methods=['GET'])
 def get_image(filename):
   return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
+
+@app.route('/users/me/delete', methods=['POST'])
+@token_required
+def delete_account(current_user):
+  result = User.delete_account(current_user)
+  if not "error" in result:
+    return "", 200
+  else:
+    return result["error"], 400

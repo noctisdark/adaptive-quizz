@@ -12,6 +12,7 @@ class Quizz(db.Model):
   option2 = db.Column(db.String(256))
   option3 = db.Column(db.String(256))
   difficulty = db.Column(db.Integer)
+  #users = db.relationship("User", secondary=user_quizz, backref="quizzes")
 
   def __init__(self, question, answer, option1, option2, option3=None, difficulty=50):
     self.question = question
@@ -24,6 +25,7 @@ class Quizz(db.Model):
 # Create table if it doesn't exist
 with app.app_context():
   Quizz.__table__.create(db.engine, checkfirst=True)
+
 
 def quizz_to_dict(quizz):
   return {"id": quizz.id, 
@@ -68,6 +70,7 @@ def db_add_quizz(quizz):
   db.session.add(quizz)
   db.session.commit()
   return {"error": None}
+
 
 def db_del_quizz(quizz):
   db.session.delete(quizz) 

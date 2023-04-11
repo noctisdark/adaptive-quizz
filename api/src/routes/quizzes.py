@@ -1,6 +1,6 @@
-from base import app
+from base import app, db
 from flask import jsonify, request, redirect, url_for
-from models import Quizz
+from models import Quizz, User
 
 
 @app.route('/quizzes')
@@ -34,8 +34,9 @@ def del_quizz():
   return jsonify(Quizz.db_del_quizz(quizz)), 200
 
 
-@app.route("/quizz/ask/<int:id>", methods=["GET"])
-def ask_quizz(id):
+@app.route("/quizz/ask", methods=["POST"])
+def ask_quizz():
+  id = request.form["id"]
   quizz = Quizz.Quizz.query.get(id)
   if not quizz:
     return {"error": "Quizz not found"}, 400
@@ -44,12 +45,19 @@ def ask_quizz(id):
   return jsonify({"error": None, "quizz": dict}), 200
 
 
-@app.route("/quizz/answer/<int:id>", methods=["POST"])
-def answer_quizz(id):
-  quizz = Quizz.Quizz.query.get(id)
+@app.route("/quizz/answer", methods=["POST"])
+def answer_quizz():
+  user_id = request.form["userId"]
+  quizz_id = request.form["quizzId"]
   answer = request.form["answer"]
+  quizz = Quizz.Quizz.query.get(quizz_id)
   result = Quizz.transition(quizz, answer)
   if result["error"]:
     return jsonify(result["error"]), 400
   else:
+    user = User.User.query.get(user_id)
+    user.quizzes.append(quizz)
+    db.session.commit()
     return redirect(url_for("ask_quizz", id=result["quizz"]["id"]))
+
+

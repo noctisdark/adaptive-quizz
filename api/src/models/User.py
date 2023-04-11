@@ -4,6 +4,7 @@ from base import app, db
 from sqlalchemy import text
 import datetime
 import jwt
+from models.UserQuizz import user_quizz
 from werkzeug.utils import secure_filename
 
 # from sqlalchemy.ext.hybrid import hybrid_property
@@ -15,10 +16,12 @@ class User(db.Model):
   username = db.Column(db.String(50))
   password = db.Column(db.String(64))
   image_url = db.Column(db.String(64))
+  quizzes = db.relationship("Quizz", secondary=user_quizz, backref="users")
 
 # Create table if it doesn't exist
 with app.app_context():
   User.__table__.create(db.engine, checkfirst=True)
+  user_quizz.create(db.engine, checkfirst=True)
   
 # Checkout the doc for building safe strings https://docs.sqlalchemy.org/en/20/orm/quickstart.html
 # Example using hybrid property as a class method User: https://docs.sqlalchemy.org/en/20/orm/extensions/hybrid.html

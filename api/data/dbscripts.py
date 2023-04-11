@@ -17,10 +17,12 @@ c = conn.cursor()
 
 
 # print rows of a table
-c.execute("SELECT * FROM users")
+c.execute("SELECT * FROM user_quizz")
 questions = c.fetchall()
 for question in questions:
     print(question)
+
+
 
 
 c.close()

@@ -17,10 +17,11 @@ def get_quizzes():
 def add_quizz():
   question = request.form["question"]
   answer = request.form["answer"]
+  option1 = request.form["option1"]
+  option2 = request.form["option2"]
+  option3 = request.form["option3"]
   difficulty = request.form["difficulty"]
-  quizz = Quizz.Quizz(question, answer, difficulty)
-  if not quizz:
-    return {"error": "Quizz not found"}, 400
+  quizz = Quizz.Quizz(question, answer, option1, option2, option3, difficulty)
   return jsonify(Quizz.db_add_quizz(quizz)), 200
 
 

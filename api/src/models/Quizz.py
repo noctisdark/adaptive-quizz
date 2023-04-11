@@ -1,19 +1,24 @@
 from base import app, db
 import random
 
-# from sqlalchemy.ext.hybrid import hybrid_property
 
 class Quizz(db.Model):
   __tablename__ = "quizzes"
 
   id = db.Column(db.Integer, primary_key=True)
   question = db.Column(db.String(256))
-  answer = db.Column(db.String(256))
+  answer = db.Column(db.Integer)
+  option1 = db.Column(db.String(256))
+  option2 = db.Column(db.String(256))
+  option3 = db.Column(db.String(256))
   difficulty = db.Column(db.Integer)
 
-  def __init__(self, question, answer, difficulty):
+  def __init__(self, question, answer, option1, option2, option3=None, difficulty=50):
     self.question = question
     self.answer = answer 
+    self.option1 = option1 
+    self.option2 = option2
+    self.option3 = option3
     self.difficulty = difficulty
 
 # Create table if it doesn't exist
@@ -24,6 +29,9 @@ def quizz_to_dict(quizz):
   return {"id": quizz.id, 
            "question": quizz.question, 
            "answer": quizz.answer, 
+           "option1": quizz.option1,
+           "option2": quizz.option2,
+           "option3": quizz.option3,
            "difficulty": quizz.difficulty}
 
 def quizzes_to_dicts(quizzes):

@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 
-import { Box, Stack } from "@chakra-ui/react";
+import { Box, Stack, useColorMode } from "@chakra-ui/react";
+import theme from "providers/UIProvider/theme";
 
 import Banner from "./Banner";
 import Links from "./Links";
@@ -8,8 +9,6 @@ import Links from "./Links";
 const StickyContainer = styled(Box)`
   position: sticky;
   top: 0;
-  background-color: ${({ theme }) => theme.colors.white};
-  box-shadow: 0 2px 4px 0 ${({ theme }) => theme.colors.gray[300]};
   z-index: 999;
 `;
 
@@ -25,13 +24,25 @@ const NavigationBar = styled(Stack)`
   }
 `;
 
-const Navigation = () => (
-  <StickyContainer height="80px">
-    <NavigationBar justifyContent="space-between">
-      <Banner />
-      <Links />
-    </NavigationBar>
-  </StickyContainer>
-);
+const Navigation = () => {
+  const { colorMode } = useColorMode();
+
+  return (
+    <StickyContainer
+      height="80px"
+      backgroundColor={
+        colorMode === "light" ? theme.colors.white : theme.colors.gray[800]
+      }
+      boxShadow={`0 2px 4px 0 ${
+        colorMode === "light" ? theme.colors.gray[300] : theme.colors.gray[900]
+      }`}
+    >
+      <NavigationBar justifyContent="space-between">
+        <Banner />
+        <Links />
+      </NavigationBar>
+    </StickyContainer>
+  );
+};
 
 export default Navigation;

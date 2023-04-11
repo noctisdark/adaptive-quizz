@@ -1,16 +1,18 @@
 import axios from "axios";
 
 import history from "providers/RouterProvider/history";
-import { localJWT } from "hooks/authentication";
+import { clearJWT, localJWT } from "hooks/authentication";
+import { toast } from "providers/ToastProvider";
 
-const instance = axios.create();
+const instance = axios.create({ errorDuration: 3000, describeError: toast });
 
 // only valid in dev environments, !TODO!: use env variable
 instance.defaults.baseURL = "http://localhost:5000";
 
 instance.interceptors.request.use(
   (req) => {
-    if (req.multipartFormData) req.headers["Content-Type"] = "multipart/form-data";
+    if (req.multipartFormData)
+      req.headers["Content-Type"] = "multipart/form-data";
     else req.headers["Content-Type"] = "application/json";
     return req;
   },
@@ -35,7 +37,31 @@ instance.interceptors.request.use(
     history.replace("/auth");
     throw new axios.Cancel("Not authenticated");
   },
-  (err) => Promise.reject(err)
+  (error) => Promise.reject(error)
+);
+
+// automatically toast errors and logout user if not connected
+// forward the error nontheless
+instance.interceptors.response.use(
+  (res) => res,
+  (error) => {
+    if (error.config.preventDefault === false) return Promise.reject(error);
+
+    const isForbidden = error.response?.status === 403;
+    error.config.describeError?.({
+      status: "error",
+      title: isForbidden ? "Logged out." : null,
+      description: error.response?.data,
+      duration: error.config.errorDuration,
+    });
+
+    if (isForbidden) {
+      clearJWT();
+      setTimeout(() => history.replace("/auth"), error.config.errorDuration);
+    }
+
+    return Promise.reject(error);
+  }
 );
 
 export default instance;

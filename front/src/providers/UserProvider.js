@@ -1,11 +1,11 @@
 import { createContext, useEffect, useContext, useState } from "react";
-import { useToast } from "@chakra-ui/react";
 
 import LoadingScreen from "components/basics/LoadingScreen";
 import ErrorScreen from "components/basics/ErrorScreen";
 import api from "api";
 import { useJWT } from "hooks/authentication";
 import { getCurrentUser } from "api/users";
+import { toast } from "./ToastProvider";
 
 import history from "./RouterProvider/history";
 
@@ -15,23 +15,25 @@ const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [error, setError] = useState(false);
   const [jwt, , invalidateJWT] = useJWT();
-  const toast = useToast();
 
   const logout = ({
+    useToast = true,
     title = "Logged out",
-    description = "You will be redirected to the home page.",
+    description = "You will be redirected to the home page...",
     status = "info",
     nextURL = "/",
+    duration = 1000,
   }) => {
-    toast({
-      title,
-      description,
-      status,
-      duration: 1000,
-    });
+    if (useToast)
+      toast({
+        title,
+        description,
+        status,
+        duration,
+      });
 
     invalidateJWT();
-    setTimeout(() => history.replace(nextURL), 1000);
+    setTimeout(() => history.replace(nextURL), duration);
   };
 
   const updateImage = (url) =>
@@ -48,14 +50,7 @@ const UserProvider = ({ children }) => {
             user.imageURL = api.defaults.baseURL + user.imageURL;
           setUser(user);
         } catch (error) {
-          const reason = error.response?.data || "Unexpected error.";
-          setError(reason);
-
-          logout({
-            status: "error",
-            description: "You will be redirected to the authentication page",
-            nextURL: "/auth",
-          });
+          setError(error.response?.data || "Unexpected error.");
         }
       })();
     // ignore missing dependency

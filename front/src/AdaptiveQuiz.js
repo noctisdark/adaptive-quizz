@@ -10,6 +10,7 @@ import Home from "components/Home";
 import When from "components/basics/When";
 
 import { authenticated } from "hooks/authentication";
+import { ToastContainer } from "providers/ToastProvider";
 
 const AdaptiveQuiz = () => (
   <React.StrictMode>
@@ -40,6 +41,7 @@ const AdaptiveQuiz = () => (
         </Routes>
       </UIProvider>
     </RouterProvider>
+    <ToastContainer />
   </React.StrictMode>
 );
 

@@ -5,13 +5,13 @@ import {
   Stack,
   useBreakpointValue,
   useColorMode,
-  useToast,
 } from "@chakra-ui/react";
 
 import hash from "utils/hash";
 import history from "providers/RouterProvider/history";
 import { useJWT } from "hooks/authentication";
 import { login, register } from "api/auth";
+import { toast } from "providers/ToastProvider";
 
 import AppIntro from "./AppIntro";
 import Form from "./Form";
@@ -31,7 +31,6 @@ const Section = styled(Box)`
 
 const AuthenticationForm = () => {
   const [, saveJWT] = useJWT();
-  const toast = useToast();
 
   // why not ?
   const { colorMode } = useColorMode();
@@ -48,19 +47,12 @@ const AuthenticationForm = () => {
       saveJWT(result.data);
       toast({
         title: "Registered.",
-        description: "Welcome back, redirecting...",
+        description: "Thank you for trusting our service, redirecting...",
         status: "success",
         duration: 1000,
       });
       redirectHome();
-    } catch ({ response: { data } }) {
-      toast({
-        title: "Error.",
-        description: data || "Unexpected error",
-        status: "error",
-        duration: 5000,
-      });
-    }
+    } catch (error) {}
   };
 
   const onLogin = async ({ username, password, rememberMe }) => {
@@ -75,14 +67,7 @@ const AuthenticationForm = () => {
         duration: 1000,
       });
       redirectHome();
-    } catch ({ response: { data } }) {
-      toast({
-        title: "Error.",
-        description: data || "Unexpected error",
-        status: "error",
-        duration: 5000,
-      });
-    }
+    } catch (error) {}
   };
 
   const stackStyles = useBreakpointValue(

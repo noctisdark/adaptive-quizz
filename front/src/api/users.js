@@ -13,5 +13,4 @@ export const changeUsername = async (newUsername) =>
 export const changePassword = async (password, oldPassword) =>
   await api.post("/users/me/password", { password, oldPassword });
 
-export const deleteAccount = async () =>
-  await api.post("/users/me/delete");
+export const deleteAccount = async () => await api.post("/users/me/delete");

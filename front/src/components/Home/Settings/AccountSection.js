@@ -15,11 +15,11 @@ import {
   IconButton,
   Button,
   Text,
-  useToast,
 } from "@chakra-ui/react";
 import { DeleteIcon, EmailIcon, LockIcon, UnlockIcon } from "@chakra-ui/icons";
 
 import { useUser } from "providers/UserProvider";
+import { toast } from "providers/ToastProvider";
 import { changePassword, changeUsername, deleteAccount } from "api/users";
 import hash from "utils/hash";
 
@@ -31,10 +31,6 @@ const AccountSection = () => {
   const [oldPassword, setOldPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
 
-  const toast = useToast();
-
-  // !TODO!: Standalone toast
-  // !TODO!: Handle basic errors with interceptor
   const onUsernameChange = async () => {
     try {
       await changeUsername(username);
@@ -44,13 +40,7 @@ const AccountSection = () => {
         description: "Username changed succesfully 🎊",
         duration: 3000,
       });
-    } catch (error) {
-      toast({
-        status: "error",
-        description: error.response.data,
-        duration: 5000,
-      });
-    }
+    } catch (error) {}
   };
 
   const onPasswordChange = async () => {
@@ -63,13 +53,7 @@ const AccountSection = () => {
         description: "Password changed succesfully 🎊",
         duration: 3000,
       });
-    } catch (error) {
-      toast({
-        status: "error",
-        description: error.response.data,
-        duration: 5000,
-      });
-    }
+    } catch (error) {}
   };
 
   const onDeleteAccount = async () => {
@@ -83,13 +67,7 @@ const AccountSection = () => {
       logout({
         title: "Deleted",
       });
-    } catch (error) {
-      toast({
-        status: "error",
-        description: error.response?.data || "Unexpected error",
-        duration: 5000,
-      });
-    }
+    } catch (error) {}
   };
 
   return (
@@ -178,7 +156,7 @@ const AccountSection = () => {
                 colorScheme="blue"
                 leftIcon={<LockIcon />}
                 alignSelf="flex-end"
-                isDisabled={password.length < 8}
+                isDisabled={password.length < 8 || oldPassword.length < 8}
                 onClick={onPasswordChange}
               >
                 <Text>Save password</Text>

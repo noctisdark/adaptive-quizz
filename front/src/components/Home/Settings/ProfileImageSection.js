@@ -12,39 +12,40 @@ const ProfileImageSection = () => {
   const {
     user: { imageURL },
     updateImage,
-    logout,
   } = useUser();
 
+  // clientside error
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [previewImageData, setPreviewImageData] = useState(null);
   const [previewImageFile, setPreviewImageFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  const onDrop = useCallback((acceptedFiles) => {
-    const file = acceptedFiles[0];
-    if (!file) return;
-    if (file.path === previewImageFile?.path) return;
+  const onDrop = useCallback(
+    (acceptedFiles) => {
+      const file = acceptedFiles[0];
+      if (!file) return;
+      if (file.path === previewImageFile?.path) return;
 
-    setPreviewImageFile(file);
+      setPreviewImageFile(file);
 
-    // Preview image
-    const reader = new FileReader();
-    reader.onerror = () => {
-      setIsLoading(false);
-      setError("Image loading failed.");
-    };
+      // Preview image
+      const reader = new FileReader();
+      reader.onerror = () => {
+        setIsLoading(false);
+        setError("Image loading failed.");
+      };
 
-    reader.onload = () => {
-      setError(null);
-      setPreviewImageData(reader.result);
-      // set this when the avatar finished loading
-      // setIsLoading(false);
-    };
+      reader.onload = () => {
+        setError(null);
+        setPreviewImageData(reader.result);
+      };
 
-    setIsLoading(true);
-    reader.readAsDataURL(file);
-  }, [previewImageFile]);
+      setIsLoading(true);
+      reader.readAsDataURL(file);
+    },
+    [previewImageFile]
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -55,7 +56,7 @@ const ProfileImageSection = () => {
   });
 
   const startUpload = async () => {
-    if (!previewImageData) return;
+    if (!previewImageData || error) return;
 
     setIsUploading(true);
     try {
@@ -65,22 +66,7 @@ const ProfileImageSection = () => {
 
       updateImage(imageURL);
       setPreviewImageData(null);
-    } catch (err) {
-      // !TODO!: Use interceptor to logoff when token expires
-      const reason = error.response?.data || "Unexpected error.";
-      setError(reason);
-
-      if (err.response.status === 403) {
-        logout({
-          status: "error",
-          description: "You will be redirected to the authentication page",
-          nextURL: "/auth",
-        });
-      }
-    } finally {
-      // wait for the avatar to load, beware race conditions
-      //setIsUploading(false);
-    }
+    } catch (error) {}
   };
 
   return (
@@ -114,19 +100,12 @@ const ProfileImageSection = () => {
               : "To change your profile image, drop a new image here or click to pick."}
           </Text>
         )}
-        {error && (
-          <>
-            <Text color="red">
-              <WarningIcon /> {error}
-            </Text>
-          </>
-        )}
       </Stack>
       <Button
         alignSelf="center"
         colorScheme="blue"
         leftIcon={<DownloadIcon />}
-        isDisabled={!previewImageData || isUploading}
+        isDisabled={!previewImageData || isUploading || error}
         onClick={startUpload}
       >
         Save

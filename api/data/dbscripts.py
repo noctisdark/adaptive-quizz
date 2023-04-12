@@ -12,7 +12,7 @@ c = conn.cursor()
 
 
 # Drop a table
-# c.execute('DROP TABLE quizzes')
+# c.execute('DROP TABLE user_quizz')
 # conn.commit()
 
 

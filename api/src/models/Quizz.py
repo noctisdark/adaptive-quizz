@@ -1,4 +1,5 @@
 from base import app, db
+from models.UserQuizz import user_quizz
 import random
 
 
@@ -12,7 +13,7 @@ class Quizz(db.Model):
   option2 = db.Column(db.String(256))
   option3 = db.Column(db.String(256))
   difficulty = db.Column(db.Integer)
-  #users = db.relationship("User", secondary=user_quizz, backref="quizzes")
+  #users = db.relationship("User", secondary=user_quizz)
 
   def __init__(self, question, answer, option1, option2, option3=None, difficulty=50):
     self.question = question
@@ -44,26 +45,41 @@ def all():
   quizzes = Quizz.query.all()
   return {"error": None, "quizzes": quizzes_to_dicts(quizzes)}
 
-def harder_than(difficulty):
-  quizzes = Quizz.query.filter(Quizz.difficulty >= difficulty)
-  quizz = random.choice(list(quizzes))
-  if not quizz:
-    return {"error": "Quizz Not Found"}
+def harder_than(quizz, user):
+  quizzes = list(Quizz.query.filter(Quizz.difficulty >= quizz.difficulty))
+  if (len(quizzes)) == 0:
+    quizzes = list(Quizz.query.all())
+  quizz = None
+  for q in quizzes:
+    if not q in user.quizzes:
+      quizz = q
+      break
+  if not quizz: 
+    return {"error": "No more questions"}
   return {"error": None, "quizz": quizz_to_dict(quizz)}
 
-def easier_than(difficulty):
-  quizzes = Quizz.query.filter(Quizz.difficulty <= difficulty)
-  quizz = random.choice(list(quizzes))
-  if not quizz:
-    return {"error": "Quizz Not Found"}
+
+def easier_than(quizz, user):
+  quizzes = list(Quizz.query.filter(Quizz.difficulty <= quizz.difficulty))
+  if (len(quizzes)) == 0:
+    quizzes = list(Quizz.query.all())
+  quizz = None
+  for q in quizzes:
+    if not q in user.quizzes:
+      quizz = q
+      break
+  if not quizz: 
+    return {"error": "No more questions"}
   return {"error": None, "quizz": quizz_to_dict(quizz)}
 
-def transition(quizz, answer):
+
+
+def transition(quizz, answer, user):
   iscorrect = quizz.answer == answer
   if iscorrect:
-    return harder_than(quizz.difficulty)
+    return harder_than(quizz, user)
   else:
-    return easier_than(quizz.difficulty)
+    return easier_than(quizz, user)
 
 
 def db_add_quizz(quizz):

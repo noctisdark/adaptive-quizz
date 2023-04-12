@@ -49,15 +49,15 @@ def ask_quizz():
 def answer_quizz():
   user_id = request.form["userId"]
   quizz_id = request.form["quizzId"]
-  answer = request.form["answer"]
+  answer = int(request.form["answer"])
   quizz = Quizz.Quizz.query.get(quizz_id)
-  result = Quizz.transition(quizz, answer)
+  user = User.User.query.get(user_id)
+  user.quizzes.append(quizz)
+  db.session.commit()
+  result = Quizz.transition(quizz, answer, user)
   if result["error"]:
     return jsonify(result["error"]), 400
   else:
-    user = User.User.query.get(user_id)
-    user.quizzes.append(quizz)
-    db.session.commit()
     return redirect(url_for("ask_quizz", id=result["quizz"]["id"]))
 
 

@@ -25,7 +25,6 @@ export const LoadingOverlay = ({ children, when, ...props }) => (
     when={when}
     backgroundColor="gray.300"
     opacity={1}
-    borderRadius="50%"
     alignItems="center"
     justifyContent="center"
     display="flex"

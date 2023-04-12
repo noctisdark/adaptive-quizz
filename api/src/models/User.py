@@ -1,9 +1,6 @@
-import os
-from uuid import uuid4
 from base import app, db
 import datetime
 import jwt
-from werkzeug.utils import secure_filename
 
 # from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -76,16 +73,6 @@ def login(creds):
     app.config['SECRET_KEY'], "HS256"
   )
   return {"error": None, "jwt": encoded_jwt}
-
-def upload_image(user, file):
-  filename = str(uuid4()) + '_' + secure_filename(file.filename)
-  save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-  access_path = '/uploads/' + filename
-  file.save(save_path)
-  user.image_url = access_path
-  db.session.add(user);
-  db.session.commit()
-  return access_path
 
 def change_username(user, new_username):
   duplicate_username = User.query.filter_by(username=new_username).first()

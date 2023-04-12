@@ -55,20 +55,6 @@ def change_password(current_user):
   else:
     return result["error"], 400
 
-@app.route('/users/me/image', methods=['POST'])
-@token_required
-def upload_image(current_user):
-  if "image" in request.files:
-    return User.upload_image(current_user, request.files["image"]), 200
-  return "No image supplied", 400
-
-# Keep it simple for now
-from flask import send_from_directory
-
-@app.route('/uploads/<path:filename>', methods=['GET'])
-def get_image(filename):
-  return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
-
 @app.route('/users/me/delete', methods=['POST'])
 @token_required
 def delete_account(current_user):

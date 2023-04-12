@@ -2,11 +2,6 @@ import api from "api";
 
 export const getCurrentUser = async () => await api.post("/users/me");
 
-export const uploadProfileImage = async (data) =>
-  await api.post("/users/me/image", data, {
-    multipartFormData: true,
-  });
-
 export const changeUsername = async (newUsername) =>
   await api.post("/users/me/username", newUsername);
 

@@ -1,21 +1,12 @@
 import { Routes, Route } from "react-router-dom";
-import { Button } from "@chakra-ui/react";
 
 import BasicLayout from "components/Layouts/BasicLayout";
 import Navigation from "components/Navigation";
 import Settings from "./Settings";
 
-import UserProvider, { useUser } from "providers/UserProvider";
-
-const Hello = () => {
-  const { user } = useUser();
-  return `Hello ${user.username}.`;
-};
-
-const LogoutButton = () => {
-  const { logout } = useUser();
-  return <Button onClick={logout}>Logout</Button>;
-};
+import UserProvider from "providers/UserProvider";
+import QuizProvider from "providers/QuizProvider";
+import Quizzes from "./Quizzes";
 
 const Home = () => {
   return (
@@ -23,15 +14,15 @@ const Home = () => {
       <Navigation />
       <BasicLayout>
         <Routes>
+          <Route path="/settings" element={<Settings />} />
           <Route
-            path="/"
+            path="/*"
             element={
-              <>
-                <Hello /> <LogoutButton />
-              </>
+              <QuizProvider>
+                <Quizzes />
+              </QuizProvider>
             }
           />
-          <Route path="/settings" element={<Settings />} />
         </Routes>
       </BasicLayout>
     </UserProvider>

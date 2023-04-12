@@ -1,6 +1,5 @@
-import { Text } from "@chakra-ui/react";
-
 import { useUser } from "providers/UserProvider";
+
 import QuizzesContainer from "./QuizzesContainer";
 
 const MyQuizzes = () => {
@@ -8,9 +7,10 @@ const MyQuizzes = () => {
 
   return (
     <QuizzesContainer
+      id="my-quizzes"
       title="My Quizzes"
       quizzes={quizzes}
-      ifEmpty="Sorry, you don't have any quizz yet. maybe create one !"
+      ifEmpty="Sorry, you don't have any quiz yet. maybe create one !"
     />
   );
 };

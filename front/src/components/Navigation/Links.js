@@ -8,9 +8,9 @@ import { useUser } from "providers/UserProvider";
 
 import ProfileMenu from "./PorfileMenu";
 
-const NavigationLink = ({ label, as = RouterLink, to, children }) => (
+const NavigationLink = ({ label, as = RouterLink, to, children, ...props }) => (
   <Tooltip label={label}>
-    <Button variant="ghost" as={as} to={to}>
+    <Button variant="ghost" as={as} to={to} {...props}>
       {children}
     </Button>
   </Tooltip>
@@ -24,10 +24,22 @@ const FeatureContainer = styled(Stack)`
   }
 `;
 
+// Todo only enable the edit button on home
+
 const Links = () => {
   const {
     user: { imageURL },
   } = useUser();
+
+  const onPlayClicked = () =>
+    document
+      .getElementById("public-quizzes")
+      ?.scrollIntoView?.({ behavior: "smooth" });
+
+  const onEditClicked = () =>
+    document
+      .getElementById("my-quizzes")
+      ?.scrollIntoView?.({ behavior: "smooth" });
 
   return (
     <FeatureContainer
@@ -36,23 +48,24 @@ const Links = () => {
       spacing={0}
       marginTop="0px !important"
     >
-      <NavigationLink label="Play a quiz" to="/play">
+      <NavigationLink
+        label="Edit your quizzes"
+        as={null}
+        onClick={onPlayClicked}
+      >
         <PlayIcon />
       </NavigationLink>
-      <NavigationLink label="Create a new quiz" to="/new">
+      <NavigationLink label="Create a new quiz" to="/home/new">
         <AddIcon />
       </NavigationLink>
-      <NavigationLink label="Edit your quizzes" to="/edit">
+      <NavigationLink
+        label="Edit your quizzes"
+        as={null}
+        onClick={onEditClicked}
+      >
         <EditIcon />
       </NavigationLink>
-      <ProfileMenu
-        button={
-          <Avatar
-            src={imageURL}
-            size="sm"
-          />
-        }
-      />
+      <ProfileMenu button={<Avatar src={imageURL} size="sm" />} />
     </FeatureContainer>
   );
 };

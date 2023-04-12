@@ -6,7 +6,8 @@ import { WarningIcon, DownloadIcon } from "@chakra-ui/icons";
 import { LoadingOverlay } from "components/basics/Overlay";
 
 import { useUser } from "providers/UserProvider";
-import { uploadProfileImage } from "api/users";
+import { uploadFile } from "api/uploads";
+import readFile from "utils/readFile";
 
 const ProfileImageSection = () => {
   const {
@@ -22,27 +23,22 @@ const ProfileImageSection = () => {
   const [isUploading, setIsUploading] = useState(false);
 
   const onDrop = useCallback(
-    (acceptedFiles) => {
+    async (acceptedFiles) => {
       const file = acceptedFiles[0];
       if (!file) return;
       if (file.path === previewImageFile?.path) return;
 
       setPreviewImageFile(file);
 
-      // Preview image
-      const reader = new FileReader();
-      reader.onerror = () => {
+      try {
+        setIsLoading(true);
+        const data = await readFile(file);
+        setError(null);
+        setPreviewImageData(data);
+      } catch (err) {
         setIsLoading(false);
         setError("Image loading failed.");
-      };
-
-      reader.onload = () => {
-        setError(null);
-        setPreviewImageData(reader.result);
-      };
-
-      setIsLoading(true);
-      reader.readAsDataURL(file);
+      }
     },
     [previewImageFile]
   );
@@ -62,7 +58,8 @@ const ProfileImageSection = () => {
     try {
       const form = new FormData();
       form.set("image", previewImageFile);
-      const { data: imageURL } = await uploadProfileImage(form);
+      form.set("set_profile", true);
+      const { data: imageURL } = await uploadFile(form);
 
       updateImage(imageURL);
       setPreviewImageData(null);

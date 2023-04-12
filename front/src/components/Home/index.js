@@ -7,6 +7,7 @@ import Settings from "./Settings";
 import UserProvider from "providers/UserProvider";
 import QuizProvider from "providers/QuizProvider";
 import Quizzes from "./Quizzes";
+import QuizBuiler from "components/QuizBuilder";
 
 const Home = () => {
   return (
@@ -14,7 +15,8 @@ const Home = () => {
       <Navigation />
       <BasicLayout>
         <Routes>
-          <Route path="/settings" element={<Settings />} />
+          <Route path="/settings" Component={Settings} />
+          <Route path="/new" Component={QuizBuiler} />
           <Route
             path="/*"
             element={

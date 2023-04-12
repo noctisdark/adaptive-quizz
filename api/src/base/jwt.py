@@ -22,6 +22,7 @@ def token_required(f):
     try:
       data = jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])
       current_user = User.query.filter_by(id=data["id"]).first()
+      if not current_user: return "Invalid token, maybe this account has been deleted.", 403
     except:
       return "Invalid token, maybe your session ended.", 403
 

@@ -1,11 +1,13 @@
 from base import app
+from base.jwt import token_required
 from flask import jsonify, request, redirect, url_for
-from models import Quizz
+from models import Quiz
 
 
 @app.route('/quizzes')
-def get_quizzes():
-  result = Quizz.all()
+@token_required
+def get_quizzes(current_user):
+  result = Quiz.all()
   if not result["error"]:
     quizzes = result["quizzes"]
     return jsonify(quizzes), 200
@@ -13,6 +15,7 @@ def get_quizzes():
     return jsonify(result["error"]), 400
 
 
+Quizz = Quiz
 @app.route("/quizz/add", methods=["POST"])
 def add_quizz():
   question = request.form["question"]

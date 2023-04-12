@@ -1,7 +1,6 @@
 import os
 from uuid import uuid4
 from base import app, db
-from sqlalchemy import text
 import datetime
 import jwt
 from werkzeug.utils import secure_filename
@@ -14,7 +13,8 @@ class User(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   username = db.Column(db.String(50))
   password = db.Column(db.String(64))
-  image_url = db.Column(db.String(64))
+  image_url = db.Column(db.String(256))
+  quizzes = db.relationship('Quiz', backref='author', lazy='joined')
 
 # Create table if it doesn't exist
 with app.app_context():
@@ -28,9 +28,11 @@ with app.app_context():
   #  return self.id == 0
 # This builds a queries similar to : SELECT * FROM users WHERE id == 0
 
+from models import Quiz
+
 # Define public queries and more complex methods
 def to_dict(user):
-  return {"id": user.id, "username": user.username, "imageURL": user.image_url}
+  return {"id": user.id, "username": user.username, "imageURL": user.image_url, "quizzes": [Quiz.quiz_to_dict(quiz) for quiz in user.quizzes]}
 
 def all():
   users = User.query.all()

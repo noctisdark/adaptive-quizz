@@ -47,15 +47,15 @@ instance.interceptors.response.use(
   (error) => {
     if (error.config.preventDefault === false) return Promise.reject(error);
 
-    const isForbidden = error.response?.status === 403;
+    const isUnauthorized = error.response?.status === 401;
     error.config.describeError?.({
       status: "error",
-      title: isForbidden ? "Logged out." : null,
+      title: isUnauthorized ? "Logged out." : null,
       description: error.response?.data,
       duration: error.config.errorDuration,
     });
 
-    if (isForbidden) {
+    if (isUnauthorized) {
       clearJWT();
       setTimeout(() => history.replace("/auth"), error.config.errorDuration);
     }

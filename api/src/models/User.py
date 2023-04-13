@@ -11,7 +11,14 @@ class User(db.Model):
   username = db.Column(db.String(50))
   password = db.Column(db.String(64))
   image_url = db.Column(db.String(256))
-  quizzes = db.relationship('Quiz', backref='author', lazy='joined')
+  quizzes = db.relationship('Quiz', backref='author', lazy=True) # Keep even if user is deleted
+  quiz_sessions = db.relationship('QuizSession', backref='user', lazy=True, cascade="all, delete-orphan")
+
+  def can_see_quiz(self, quiz):
+    return quiz.author_id == self.id
+
+  def can_modify_quiz(self, quiz):
+    return self.can_see_quiz(quiz)
 
 # Create table if it doesn't exist
 with app.app_context():

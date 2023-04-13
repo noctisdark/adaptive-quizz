@@ -15,9 +15,11 @@ class Quiz(db.Model):
   title = db.Column(db.String(64))
   description = db.Column(db.String(256))
   background_url = db.Column(db.String(256))
-  author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+  author_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
   public = db.Column(db.Boolean, default=False)
+  duration = db.Column(db.Integer, default=300)
   questions = db.relationship('Question', backref='quiz', lazy=True, cascade='all, delete-orphan', order_by='Question.id')
+  sessions = db.relationship('QuizSession', backref='quiz', lazy=True, cascade="all, delete-orphan")
 
 class Question(db.Model):
   __tablename__ = "questions"
@@ -30,7 +32,7 @@ class Question(db.Model):
   option_2 = db.Column(db.String(64))
   option_3 = db.Column(db.String(64))
   option_4 = db.Column(db.String(64))
-  quiz_id = db.Column(db.Integer, db.ForeignKey('quizzes.id'))
+  quiz_id = db.Column(db.Integer, db.ForeignKey('quizzes.id'), nullable=False)
 
 
 # Create table if it doesn't exist
@@ -38,28 +40,31 @@ with app.app_context():
   Quiz.__table__.create(db.engine, checkfirst=True)
   Question.__table__.create(db.engine, checkfirst=True)
 
-def question_to_dict(question):
-  return {
+def question_to_dict(user, question):
+  data = {
     "id": question.id,
     "statement": question.statement,
     "difficulty": question.difficulty,
-    "answer": question.answer,
     "option_1": question.option_1,
     "option_2": question.option_2,
     "option_3": question.option_3,
     "option_4": question.option_4,
   }
 
-def quiz_to_dict(quiz):
+  # !TODO!: Investigate the impact of this later
+  if user.can_see_quiz(question.quiz): data["answer"] = question.answer
+  return data;
+
+def quiz_to_dict(user, quiz):
   return {
     "id": quiz.id,
     "title": quiz.title,
     "description": quiz.description,
     "backgroundURL": quiz.background_url,
-    "authorId": quiz.author.id,
+    "authorId": quiz.author_id,
     "public": quiz.public,
-    "author": quiz.author.username,
-    "questions": [question_to_dict(question) for question in quiz.questions]
+    "author": "<deleted user>" if not quiz.author_id else quiz.author.username,
+    "questions": [question_to_dict(user, question) for question in quiz.questions]
   }
 
 
@@ -69,28 +74,33 @@ def all(user):
     joinedload(Quiz.author),
     joinedload(Quiz.questions)
   ).filter(or_(Quiz.public==True, Quiz.author_id == user.id)).all()
-  return {"error": None, "quizzes": [quiz_to_dict(quiz) for quiz in public_quizzes]}
+  return {"error": None, "quizzes": [quiz_to_dict(user, quiz) for quiz in public_quizzes]}
 
 def create(user, data):
   new_quiz = Quiz(title=data["title"], description=data["description"], author_id=user.id, background_url=data["backgroundURL"], public=True, questions=[])
   db.session.add(new_quiz)
   db.session.commit()
-  return {"error": None, "quiz": quiz_to_dict(new_quiz)}
+  return {"error": None, "quiz": quiz_to_dict(user, new_quiz)}
+
+# Shoudlve done the fetching on the controller to avoid sending code here
+# But this ship has already sailed, let's keep going
 
 def update(user, data):
   quiz = Quiz.query.get(data["id"])
   if not quiz: return {"error": "No such quiz."}
+  if not user.can_modify_quiz(quiz): return {"error": "You cannot modify others' quizzes."} 
   quiz.title = data["title"]
   quiz.description = data["description"]
   quiz.background_url = data["backgroundURL"]
   quiz.public = data.get("public", True)
   db.session.commit()
-  return {"error": None, "quiz": quiz_to_dict(quiz)}
+  return {"error": None, "quiz": quiz_to_dict(user, quiz)}
 
 
-def delete(user, id):
-  quiz = Quiz.query.get(id)
+def delete(user, quiz_id):
+  quiz = Quiz.query.get(quiz_id)
   if not quiz: return {"error": "No such quiz."}
+  if not user.can_modify_quiz(quiz): return {"error": "You cannot delete others' quizzes."} 
   db.session.delete(quiz) #SQLAlchemy should handle the rest
   db.session.commit()
   return {"error": None}
@@ -108,11 +118,12 @@ def create_question(user, quiz_id, data):
   )
   db.session.add(new_question)
   db.session.commit()
-  return {"error": None, "question": question_to_dict(new_question)}
+  return {"error": None, "question": question_to_dict(user, new_question)}
 
 def update_question(user, data):
-  question = Question.query.get(data["id"])
+  question = Question.query.options(joinedload(Question.quiz)).get(data["id"])
   if not question: return {"error": "No such question."}
+  if not user.can_modify_quiz(question.quiz): return {"error": "You cannot modify others' quizzes."} 
   question.statement = data["statement"]
   question.option_1 = data["option_1"]
   question.option_2 = data["option_2"]
@@ -121,14 +132,15 @@ def update_question(user, data):
   question.answer = data["answer"]
   question.difficulty = data["difficulty"]  
   db.session.commit()
-  return {"error": None, "question": question_to_dict(question)}
+  return {"error": None, "question": question_to_dict(user, question)}
 
 def delete_question(user, question_id):
-  question = Question.query.get(question_id)
+  question = Question.query.options(joinedload(Question.quiz)).get(question_id)
   if not question: return {"error": "No such question."}
+  if not user.can_modify_quiz(question.quiz): return {"error": "You cannot delete others' quizzes."}
   db.session.delete(question)
   db.session.commit()
-  return {"error": None, "question": question_to_dict(question)}
+  return {"error": None}
 
 def harder_than(difficulty):
   quizzes = Quizz.query.filter(Quizz.difficulty >= difficulty)

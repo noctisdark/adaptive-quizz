@@ -34,10 +34,20 @@ def update_quiz(current_user):
   else:
     return jsonify(result["error"]), 400
   
+@app.route('/quizzes/<int:id>', methods=['DELETE'])
+@token_required
+def delete_quiz(current_user, id):
+  result = Quiz.delete(current_user, id)
+  if not result["error"]:
+    return "OK", 200
+  else:
+    return jsonify(result["error"]), 400
+
+  
 @app.route('/questions', methods=['POST'])
 @token_required
 def create_question(current_user):
-  result = Quiz.create_question(current_user, request.json["quiz_id"], request.json)
+  result = Quiz.create_question(current_user, request.json["quizId"], request.json)
   if not result["error"]:
     question = result["question"]
     return jsonify(question), 200
@@ -51,6 +61,15 @@ def update_question(current_user):
   if not result["error"]:
     question = result["question"]
     return jsonify(question), 200
+  else:
+    return jsonify(result["error"]), 400
+
+@app.route('/questions/<int:id>', methods=['DELETE'])
+@token_required
+def delete_question(current_user, id):
+  result = Quiz.delete_question(current_user, id)
+  if not result["error"]:
+    return "OK", 200
   else:
     return jsonify(result["error"]), 400
 

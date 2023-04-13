@@ -1,14 +1,15 @@
-import { useState } from "react";
 import { Box, Heading } from "@chakra-ui/react";
 
 import { useParams } from "react-router-dom";
 import { useQuiz } from "providers/QuizProvider";
 
 import QuizForm from "./QuizForm";
-import QuizQuestions from "./QuizQuestions";
+import QuizQuestionsForm from "./QuizQuestionsForm";
 
-// !TODO!: Very important but after the end
-// Split the state, updating a tree is killing performance
+// This component creates update drafts that sync with the QuizProvider when something is saved online
+// This component doesn't support changing the quiz.id
+// doing so will discard all the current data
+
 const QuizBuiler = ({
   initialQuiz = {
     id: -1,
@@ -22,13 +23,16 @@ const QuizBuiler = ({
   const { getQuizById } = useQuiz();
   const params = useParams();
   const savedQuiz = params.id && getQuizById(+params.id);
-  const [quiz, setQuiz] = useState(savedQuiz || initialQuiz);
+  const quiz = savedQuiz || initialQuiz;
+  const isNew = quiz.id === -1;
 
   return (
-    <Box padding="20px">
-      <Heading as="h3">Qwizard: Create a new Quiz</Heading>
-      <QuizForm quiz={quiz} setQuiz={setQuiz} />
-      <QuizQuestions quiz={quiz} setQuiz={setQuiz} />
+    <Box key={quiz.id} padding="20px">
+      <Heading as="h3">
+        Qwizard: {isNew ? "Create a new Quiz" : "Edit your quiz"}
+      </Heading>
+      <QuizForm quiz={quiz} />
+      <QuizQuestionsForm quiz={quiz} />
     </Box>
   );
 };

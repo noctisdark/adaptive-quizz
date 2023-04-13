@@ -49,6 +49,24 @@ const TagDifficulty = ({ difficulty, isActive, onDiffucultyChange }) => {
   );
 };
 
+const Indictor = ({ isNew, changed }) => (
+  <Box fontSize="0.75em">
+    {isNew ? (
+      <Text color="red">
+        <WarningIcon /> This question is not saved
+      </Text>
+    ) : changed ? (
+      <Text color="orange">
+        <WarningTwoIcon /> This question has changed, please save.
+      </Text>
+    ) : (
+      <Text color="green">
+        <CheckIcon /> This question is saved
+      </Text>
+    )}
+  </Box>
+);
+
 export const checkQuestionError = (quiz, question) =>
   !question.statement
     ? "The question needs a statement."
@@ -76,27 +94,27 @@ const QuizQuestionForm = ({
   onDelete,
 }) => {
   const { user } = useUser();
-  
+
   const [question, setQuestion] = useState(initialQuestion);
   const [changed, setChanged] = useState(false);
   const isNew = question.id === -1;
 
-  const markChangedAndSetQuestion = (newQuestion) => {
+  const markChangedAndSetDraft = (newQuestion) => {
     setChanged(true);
     setQuestion(newQuestion);
   };
 
   const onAnswerChange = (answer) =>
-    markChangedAndSetQuestion({ ...question, answer });
+    markChangedAndSetDraft({ ...question, answer });
 
   const onDiffucultyChange = (difficulty) =>
-    markChangedAndSetQuestion({ ...question, difficulty });
+    markChangedAndSetDraft({ ...question, difficulty });
 
   const onStatementChange = (statement) =>
-    markChangedAndSetQuestion({ ...question, statement });
+    markChangedAndSetDraft({ ...question, statement });
 
   const onOptionChange = (idx, option) =>
-    markChangedAndSetQuestion({ ...question, [`option_${idx}`]: option });
+    markChangedAndSetDraft({ ...question, [`option_${idx}`]: option });
 
   let formError = checkQuestionError(quiz, question);
 
@@ -153,6 +171,7 @@ const QuizQuestionForm = ({
               <InputGroup>
                 <InputLeftAddon padding={0}>
                   <AddonButton
+                    tabIndex={-1}
                     colorScheme={idx === question.answer ? "green" : "red"}
                     onClick={() => onAnswerChange(idx)}
                   >
@@ -175,28 +194,16 @@ const QuizQuestionForm = ({
           </Text>
         )}
         <Flex justifyContent="space-between" alignItems="flex-end" gap={4}>
-          <Box fontSize="0.75em">
-            {isNew ? (
-              <Text color="red">
-                <WarningIcon /> This question is not saved{" "}
-              </Text>
-            ) : changed ? (
-              <Text color="orange">
-                <WarningTwoIcon /> This question has changed, please save.
-              </Text>
-            ) : (
-              <Text color="green">
-                <CheckIcon /> This question is saved
-              </Text>
-            )}
-          </Box>
+          <Indictor isNew={isNew} changed={changed} />
           <Flex gap={4}>
-            <Button colorScheme="red" onClick={() => onDelete(index)}>
+            <Button colorScheme="red" onClick={() => onDelete(index, question)}>
               Delete
             </Button>
             <Button
               colorScheme="green"
-              onClick={() => onSave(index, question).then(() => setChanged(false))}
+              onClick={() =>
+                onSave(index, question).then(() => setChanged(false))
+              }
               isDisabled={formError}
             >
               Save

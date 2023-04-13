@@ -4,7 +4,13 @@ import LoadingScreen from "components/basics/LoadingScreen";
 import ErrorScreen from "components/basics/ErrorScreen";
 
 import { getPublicQuizzes } from "api/quizzes";
-import { concat, extractIf, replaceById } from "utils/immutableArray";
+import {
+  concat,
+  deleteById,
+  deleteByIndex,
+  extractIf,
+  replaceById,
+} from "utils/immutableArray";
 import { useUser } from "./UserProvider";
 
 const QuizContext = createContext();
@@ -22,16 +28,24 @@ const QuizProvider = ({ children }) => {
 
   const replaceQuiz = (quiz) => setQuizzes(replaceById(quizzes, quiz.id, quiz));
 
+  const removeQuiz = (quiz) => setQuizzes(deleteById(quizzes, quiz.id));
+
   const addQuizQuestion = (quiz, question) =>
     replaceById(quizzes, quiz.id, {
       ...quiz,
-      questions: concat(quiz.question, question),
+      questions: concat(quiz.questions, question),
     });
 
   const replaceQuizQuestion = (quiz, question) =>
     replaceById(quizzes, quiz.id, {
       ...quiz,
-      questions: replaceById(quiz.question, question.id, question),
+      questions: replaceById(quiz.questions, question.id, question),
+    });
+
+  const removeQuizQuestion = (quiz, index) =>
+    replaceById(quizzes, quiz.id, {
+      ...quiz,
+      questions: deleteByIndex(quiz.questions, index),
     });
 
   const getQuizById = (id) => quizzes.find((quiz) => quiz.id === id);
@@ -61,7 +75,9 @@ const QuizProvider = ({ children }) => {
         replaceQuiz,
         getQuizById,
         addQuizQuestion,
-        replaceQuizQuestion
+        replaceQuizQuestion,
+        removeQuizQuestion,
+        removeQuiz,
       }}
     >
       {children}

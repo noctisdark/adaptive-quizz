@@ -17,7 +17,7 @@ class Quiz(db.Model):
   background_url = db.Column(db.String(256))
   author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
   public = db.Column(db.Boolean, default=False)
-  questions = db.relationship('Question', backref='quiz', lazy=True)
+  questions = db.relationship('Question', backref='quiz', lazy=True, cascade='all, delete-orphan', order_by='Question.id')
 
 class Question(db.Model):
   __tablename__ = "questions"
@@ -87,6 +87,14 @@ def update(user, data):
   db.session.commit()
   return {"error": None, "quiz": quiz_to_dict(quiz)}
 
+
+def delete(user, id):
+  quiz = Quiz.query.get(id)
+  if not quiz: return {"error": "No such quiz."}
+  db.session.delete(quiz) #SQLAlchemy should handle the rest
+  db.session.commit()
+  return {"error": None}
+
 def create_question(user, quiz_id, data):
   new_question = Question(
     statement=data["statement"],
@@ -112,6 +120,13 @@ def update_question(user, data):
   question.option_4 = data["option_4"]
   question.answer = data["answer"]
   question.difficulty = data["difficulty"]  
+  db.session.commit()
+  return {"error": None, "question": question_to_dict(question)}
+
+def delete_question(user, question_id):
+  question = Question.query.get(question_id)
+  if not question: return {"error": "No such question."}
+  db.session.delete(question)
   db.session.commit()
   return {"error": None, "question": question_to_dict(question)}
 

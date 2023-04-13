@@ -14,7 +14,7 @@ import {
   Box,
   Heading,
 } from "@chakra-ui/react";
-import { WarningIcon } from "@chakra-ui/icons";
+import { CheckIcon, WarningIcon, WarningTwoIcon } from "@chakra-ui/icons";
 
 import { LoadingOverlay } from "components/basics/Overlay";
 
@@ -22,19 +22,45 @@ import readFile from "utils/readFile";
 import PlayIcon from "components/icons/PlayIcon";
 import { useUser } from "providers/UserProvider";
 import { useQuiz } from "providers/QuizProvider";
-import { createOrUpdateQuiz } from "api/quizzes";
+import { createOrUpdateQuiz, deleteQuiz } from "api/quizzes";
 import { uploadFile } from "api/uploads";
+import history from "providers/RouterProvider/history";
 
-const QuizForm = ({ quiz, setQuiz }) => {
-  const { title, description, backgroundURL } = quiz || {};
-  const isNew = quiz.id === -1;
+const Indictor = ({ isNew, changed }) => (
+  <Box fontSize="0.75em">
+    {isNew ? (
+      <Text color="red">
+        <WarningIcon /> This quiz is not saved
+      </Text>
+    ) : changed ? (
+      <Text color="orange">
+        <WarningTwoIcon /> This quiz has changed, please save.
+      </Text>
+    ) : (
+      <Text color="green">
+        <CheckIcon /> This quiz is saved
+      </Text>
+    )}
+  </Box>
+);
+
+const QuizForm = ({ quiz }) => {
+  const [quizDraft, setQuizDraft] = useState(quiz);
+  const { title, description, backgroundURL } = quizDraft;
+  const isNew = quizDraft.id === -1;
 
   const { user } = useUser();
-  const { addQuiz, replaceQuiz } = useQuiz();
+  const { addQuiz, replaceQuiz, removeQuiz } = useQuiz();
 
+  const [changed, setChanged] = useState(false);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [previewImageFile, setPreviewImageFile] = useState(null);
+
+  const markChangedAndSetDraft = (newDraft) => {
+    setChanged(true);
+    setQuizDraft(newDraft);
+  };
 
   // !TODO!: Make a component that does this
   const onDrop = useCallback(
@@ -48,7 +74,7 @@ const QuizForm = ({ quiz, setQuiz }) => {
       try {
         setIsLoading(true);
         const data = await readFile(file);
-        setQuiz({ ...quiz, backgroundURL: data });
+        markChangedAndSetDraft({ ...quizDraft, backgroundURL: data });
         setIsLoading(false);
         setError(null);
       } catch (err) {
@@ -57,7 +83,7 @@ const QuizForm = ({ quiz, setQuiz }) => {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [previewImageFile, quiz]
+    [previewImageFile, quizDraft]
   );
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -67,9 +93,10 @@ const QuizForm = ({ quiz, setQuiz }) => {
     },
   });
 
-  const onTitleChange = (title) => setQuiz({ ...quiz, title });
+  const onTitleChange = (title) =>
+    markChangedAndSetDraft({ ...quizDraft, title });
   const onDescriptionChange = (description) =>
-    setQuiz({ ...quiz, description });
+    markChangedAndSetDraft({ ...quizDraft, description });
 
   // step 1: implement creating quizzes, no delete so far
   // step 2: implement building answers
@@ -77,7 +104,7 @@ const QuizForm = ({ quiz, setQuiz }) => {
   // step 4: implement delete
   const onSaveQuiz = async () => {
     try {
-      let { backgroundURL } = quiz;
+      let { backgroundURL } = quizDraft;
       // upload the image
       if (previewImageFile) {
         const uploadForm = new FormData();
@@ -86,16 +113,28 @@ const QuizForm = ({ quiz, setQuiz }) => {
       }
 
       const { data: newQuiz } = await createOrUpdateQuiz({
-        ...quiz,
+        ...quizDraft,
         backgroundURL,
-        questions: [],
+        questions: [], // don't send questions
       });
 
-      if (isNew) addQuiz(newQuiz);
-      else replaceQuiz(newQuiz);
+      if (isNew) {
+        addQuiz(newQuiz);
+        history.replace("/home/edit/" + newQuiz.id);
+      } else replaceQuiz(newQuiz);
 
-      // update the form to continue editing
-      setQuiz(newQuiz);
+      // update the draft to continue editing
+      setChanged(false);
+      setQuizDraft(newQuiz);
+    } catch (error) {}
+  };
+
+  const onDeleteQuiz = async () => {
+    if (isNew) return; //can't happen
+    try {
+      await deleteQuiz(quizDraft);
+      removeQuiz(quizDraft);
+      history.replace("/home/new");
     } catch (error) {}
   };
 
@@ -171,14 +210,24 @@ const QuizForm = ({ quiz, setQuiz }) => {
               Play
             </Button>
           </Flex>
-          <Flex justifyContent="flex-end" gap={4}>
-            <Button
-              colorScheme="green"
-              onClick={onSaveQuiz}
-              isDisabled={formError}
-            >
-              {isNew ? "Create quiz" : "Save quiz"}
-            </Button>
+          <Flex justifyContent="space-between" alignItems="flex-end">
+            <Indictor isNew={isNew} changed={changed} />
+            <Flex justifyContent="flex-end" gap={4}>
+              <Button
+                colorScheme="red"
+                onClick={onDeleteQuiz}
+                isDisabled={isNew}
+              >
+                Delete quiz
+              </Button>
+              <Button
+                colorScheme="green"
+                onClick={onSaveQuiz}
+                isDisabled={formError}
+              >
+                {isNew ? "Create quiz" : "Save quiz"}
+              </Button>
+            </Flex>
           </Flex>
         </CardFooter>
       </Card>

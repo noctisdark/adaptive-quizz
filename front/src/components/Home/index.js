@@ -17,6 +17,7 @@ const Home = () => {
         <BasicLayout>
           <Routes>
             <Route path="/settings" Component={Settings} />
+            {/* !TODO!: Discard and create */}
             <Route path="/new" Component={QuizBuiler} />
             <Route path="/edit/:id" Component={QuizBuiler} />
             <Route path="/*" element={<Quizzes />} />

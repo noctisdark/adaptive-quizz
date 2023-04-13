@@ -47,9 +47,9 @@ const QuizProvider = ({ children }) => {
       ...quiz,
       questions: deleteByIndex(quiz.questions, index),
     });
-
+  
   const getQuizById = (id) => quizzes.find((quiz) => quiz.id === id);
-
+  
   useEffect(() => {
     (async () => {
       try {

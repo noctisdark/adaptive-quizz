@@ -44,7 +44,7 @@ const QuizCard = ({ quiz, canEdit }) => {
           By @{author}
         </Text>
         <Flex gap={4} marginLeft={-2}>
-          <Button variant="ghost" leftIcon={<PlayIcon />}>
+          <Button as={RouterLink} to={`/home/play/${quiz.id}`} variant="ghost" leftIcon={<PlayIcon />}>
             Play
           </Button>
           {canEdit && (

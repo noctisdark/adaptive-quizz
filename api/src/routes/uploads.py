@@ -16,10 +16,10 @@ def upload_image(current_user):
     access_path = '/uploads/' + filename
     file.save(save_path)
     if request.form.get("set_profile"):
-      current_user.image_url = access_path
+      current_user.image_url = request.host_url + access_path
       db.session.add(current_user)
       db.session.commit()
-    return access_path
+    return request.host_url + access_path
   return "No image supplied", 400
 # Keep it simple for now
 

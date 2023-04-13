@@ -70,16 +70,16 @@ export const checkQuestionError = (quiz, question) =>
 
 const QuizQuestionForm = ({
   index,
-  question,
-  setQuestion,
+  initialQuestion,
   quiz,
   onSave,
   onDelete,
 }) => {
   const { user } = useUser();
-  const isNew = question.id === -1;
-
+  
+  const [question, setQuestion] = useState(initialQuestion);
   const [changed, setChanged] = useState(false);
+  const isNew = question.id === -1;
 
   const markChangedAndSetQuestion = (newQuestion) => {
     setChanged(true);
@@ -196,7 +196,7 @@ const QuizQuestionForm = ({
             </Button>
             <Button
               colorScheme="green"
-              onClick={() => onSave(index).then(() => setChanged(false))}
+              onClick={() => onSave(index, question).then(() => setChanged(false))}
               isDisabled={formError}
             >
               Save

@@ -36,15 +36,15 @@ const QuizQuestions = ({ quiz, setQuiz }) => {
       questions: replaceByIndex(questions, idx, newQuestion),
     });
 
-  const onSaveQuestion = async (index) => {
+  const onSaveQuestion = async (index, question) => {
     try {
-      const question = questions[index],
-        isNew = question.id === -1,
+      const isNew = question.id === -1,
         { data: newQuestion } = await createOrUpdateQuestion({
-          ...questions[index],
+          ...question,
           quiz_id: quiz.id,
         });
 
+      console.log(question, newQuestion);
       setQuestion(index, newQuestion);
 
       if (isNew) addQuizQuestion(quiz, newQuestion);
@@ -70,8 +70,7 @@ const QuizQuestions = ({ quiz, setQuiz }) => {
               key={index}
               quiz={quiz}
               index={index}
-              question={question}
-              setQuestion={(newQuestion) => setQuestion(index, newQuestion)}
+              initialQuestion={question}
               onDelete={() => console.log("delete")}
               onSave={onSaveQuestion}
             />

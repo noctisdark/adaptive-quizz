@@ -29,7 +29,7 @@ from models import Quiz
 
 # Define public queries and more complex methods
 def to_dict(user):
-  return {"id": user.id, "username": user.username, "imageURL": user.image_url, "quizzes": [Quiz.quiz_to_dict(quiz) for quiz in user.quizzes]}
+  return {"id": user.id, "username": user.username, "imageURL": user.image_url}
 
 def all():
   users = User.query.all()

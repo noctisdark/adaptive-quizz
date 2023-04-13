@@ -1,4 +1,5 @@
 from base import app, db
+from sqlalchemy import or_
 from sqlalchemy.orm import joinedload
 import random
 
@@ -41,6 +42,7 @@ def question_to_dict(question):
   return {
     "id": question.id,
     "statement": question.statement,
+    "difficulty": question.difficulty,
     "answer": question.answer,
     "option_1": question.option_1,
     "option_2": question.option_2,
@@ -53,18 +55,65 @@ def quiz_to_dict(quiz):
     "id": quiz.id,
     "title": quiz.title,
     "description": quiz.description,
+    "backgroundURL": quiz.background_url,
+    "authorId": quiz.author.id,
+    "public": quiz.public,
     "author": quiz.author.username,
     "questions": [question_to_dict(question) for question in quiz.questions]
   }
 
 
-def all():
+def all(user):
   # Eager load to avoid N+1 queries
   public_quizzes = db.session.query(Quiz).options(
     joinedload(Quiz.author),
     joinedload(Quiz.questions)
-  ).filter_by(public=True).all()
+  ).filter(or_(Quiz.public==True, Quiz.author_id == user.id)).all()
   return {"error": None, "quizzes": [quiz_to_dict(quiz) for quiz in public_quizzes]}
+
+def create(user, data):
+  new_quiz = Quiz(title=data["title"], description=data["description"], author_id=user.id, background_url=data["backgroundURL"], public=True, questions=[])
+  db.session.add(new_quiz)
+  db.session.commit()
+  return {"error": None, "quiz": quiz_to_dict(new_quiz)}
+
+def update(user, data):
+  quiz = Quiz.query.get(data["id"])
+  if not quiz: return {"error": "No such quiz."}
+  quiz.title = data["title"]
+  quiz.description = data["description"]
+  quiz.background_url = data["backgroundURL"]
+  quiz.public = data.get("public", True)
+  db.session.commit()
+  return {"error": None, "quiz": quiz_to_dict(quiz)}
+
+def create_question(user, quiz_id, data):
+  new_question = Question(
+    statement=data["statement"],
+    option_1=data["option_1"],
+    option_2=data["option_2"],
+    option_3=data["option_3"],
+    option_4=data["option_4"],
+    answer=data["answer"],
+    difficulty=data["difficulty"],
+    quiz_id=quiz_id
+  )
+  db.session.add(new_question)
+  db.session.commit()
+  return {"error": None, "question": question_to_dict(new_question)}
+
+def update_question(user, data):
+  question = Question.query.get(data["id"])
+  if not question: return {"error": "No such question."}
+  question.statement = data["statement"]
+  question.option_1 = data["option_1"]
+  question.option_2 = data["option_2"]
+  question.option_3 = data["option_3"]
+  question.option_4 = data["option_4"]
+  question.answer = data["answer"]
+  question.difficulty = data["difficulty"]  
+  db.session.commit()
+  return {"error": None, "question": question_to_dict(question)}
 
 def harder_than(difficulty):
   quizzes = Quizz.query.filter(Quizz.difficulty >= difficulty)

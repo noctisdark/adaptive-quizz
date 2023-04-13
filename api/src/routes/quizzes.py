@@ -7,13 +7,52 @@ from models import Quiz
 @app.route('/quizzes')
 @token_required
 def get_quizzes(current_user):
-  result = Quiz.all()
+  result = Quiz.all(current_user)
   if not result["error"]:
     quizzes = result["quizzes"]
     return jsonify(quizzes), 200
   else:
     return jsonify(result["error"]), 400
-
+  
+@app.route('/quizzes', methods=['POST'])
+@token_required
+def create_quiz(current_user):
+  result = Quiz.create(current_user, request.json)
+  if not result["error"]:
+    quiz = result["quiz"]
+    return jsonify(quiz), 200
+  else:
+    return jsonify(result["error"]), 400
+  
+@app.route('/quizzes', methods=['PATCH'])
+@token_required
+def update_quiz(current_user):
+  result = Quiz.update(current_user, request.json)
+  if not result["error"]:
+    quiz = result["quiz"]
+    return jsonify(quiz), 200
+  else:
+    return jsonify(result["error"]), 400
+  
+@app.route('/questions', methods=['POST'])
+@token_required
+def create_question(current_user):
+  result = Quiz.create_question(current_user, request.json["quiz_id"], request.json)
+  if not result["error"]:
+    question = result["question"]
+    return jsonify(question), 200
+  else:
+    return jsonify(result["error"]), 400
+  
+@app.route('/questions', methods=['PATCH'])
+@token_required
+def update_question(current_user):
+  result = Quiz.update_question(current_user, request.json)
+  if not result["error"]:
+    question = result["question"]
+    return jsonify(question), 200
+  else:
+    return jsonify(result["error"]), 400
 
 Quizz = Quiz
 @app.route("/quizz/add", methods=["POST"])

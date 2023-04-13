@@ -1,6 +1,6 @@
 import api from "api";
 
-export const uploadFile = async (data) =>
-  await api.post("/upload", data, {
+export const uploadFile = (fileForm) =>
+  api.post("/upload", fileForm, {
     multipartFormData: true,
   });

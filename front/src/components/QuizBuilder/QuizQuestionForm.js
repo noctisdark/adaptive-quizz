@@ -1,3 +1,4 @@
+import { useState } from "react";
 import styled from "@emotion/styled";
 import {
   Box,
@@ -18,7 +19,7 @@ import {
   TagLabel,
 } from "@chakra-ui/react";
 
-import { WarningIcon } from "@chakra-ui/icons";
+import { CheckIcon, WarningIcon, WarningTwoIcon } from "@chakra-ui/icons";
 
 import { useUser } from "providers/UserProvider";
 
@@ -48,28 +49,8 @@ const TagDifficulty = ({ difficulty, isActive, onDiffucultyChange }) => {
   );
 };
 
-const QuizQuestionForm = ({
-  index,
-  question,
-  setQuestion,
-  quiz,
-  onSave,
-  onDelete,
-}) => {
-  const { user } = useUser();
-
-  const onAnswerChange = (answer) => setQuestion({ ...question, answer });
-
-  const onDiffucultyChange = (difficulty) =>
-    setQuestion({ ...question, difficulty });
-
-  const onStatementChange = (statement) =>
-    setQuestion({ ...question, statement });
-
-  const onOptionChange = (idx, option) =>
-    setQuestion({ ...question, [`option_${idx}`]: option });
-
-  let formError = !question.statement
+export const checkQuestionError = (quiz, question) =>
+  !question.statement
     ? "The question needs a statement."
     : !question.difficulty
     ? "The question needs a difficulty level."
@@ -84,13 +65,46 @@ const QuizQuestionForm = ({
     : !question.answer
     ? "The question needs an answer."
     : quiz.id === -1
-    ? "Please save the quiz first" : "";
+    ? "Please save the quiz first"
+    : "";
+
+const QuizQuestionForm = ({
+  index,
+  question,
+  setQuestion,
+  quiz,
+  onSave,
+  onDelete,
+}) => {
+  const { user } = useUser();
+  const isNew = question.id === -1;
+
+  const [changed, setChanged] = useState(false);
+
+  const markChangedAndSetQuestion = (newQuestion) => {
+    setChanged(true);
+    setQuestion(newQuestion);
+  };
+
+  const onAnswerChange = (answer) =>
+    markChangedAndSetQuestion({ ...question, answer });
+
+  const onDiffucultyChange = (difficulty) =>
+    markChangedAndSetQuestion({ ...question, difficulty });
+
+  const onStatementChange = (statement) =>
+    markChangedAndSetQuestion({ ...question, statement });
+
+  const onOptionChange = (idx, option) =>
+    markChangedAndSetQuestion({ ...question, [`option_${idx}`]: option });
+
+  let formError = checkQuestionError(quiz, question);
 
   return (
     <Card variant="elevated">
       <CardBody padding={0}>
         <Box
-          backgroundImage={quiz.backgroundImageData}
+          backgroundImage={quiz.backgroundURL}
           backgroundRepeat="no-repeat"
           backgroundPosition="center"
           backgroundSize="cover"
@@ -100,9 +114,9 @@ const QuizQuestionForm = ({
           w="xl"
           minH="100px"
         >
-          <Text as="p" p={1}>
-            <Text as="b">{quiz.title}</Text>
-            <Text as="i">By {user.username}</Text>
+          <Text as="p" p={1} backgroundColor="#ffffff9f">
+            <Text as="b">{quiz.title}</Text> By{" "}
+            <Text as="i">@{user.username}</Text>
           </Text>
         </Box>
       </CardBody>
@@ -160,13 +174,34 @@ const QuizQuestionForm = ({
             <WarningIcon /> {formError}
           </Text>
         )}
-        <Flex justifyContent="flex-end" gap={4}>
-          <Button colorScheme="red" onClick={() => onDelete(index)}>
-            Delete
-          </Button>
-          <Button colorScheme="green" onClick={() => onSave(index)} isDisabled={formError}>
-            Save
-          </Button>
+        <Flex justifyContent="space-between" alignItems="flex-end" gap={4}>
+          <Box fontSize="0.75em">
+            {isNew ? (
+              <Text color="red">
+                <WarningIcon /> This question is not saved{" "}
+              </Text>
+            ) : changed ? (
+              <Text color="orange">
+                <WarningTwoIcon /> This question has changed, please save.
+              </Text>
+            ) : (
+              <Text color="green">
+                <CheckIcon /> This question is saved
+              </Text>
+            )}
+          </Box>
+          <Flex gap={4}>
+            <Button colorScheme="red" onClick={() => onDelete(index)}>
+              Delete
+            </Button>
+            <Button
+              colorScheme="green"
+              onClick={() => onSave(index).then(() => setChanged(false))}
+              isDisabled={formError}
+            >
+              Save
+            </Button>
+          </Flex>
         </Flex>
       </CardFooter>
     </Card>

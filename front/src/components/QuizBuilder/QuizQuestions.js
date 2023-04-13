@@ -3,8 +3,11 @@ import { Flex, Heading, Text, Button, Tooltip } from "@chakra-ui/react";
 import QuizQuestionForm from "./QuizQuestionForm";
 import { AddIcon } from "@chakra-ui/icons";
 import { replaceByIndex } from "utils/immutableArray";
+import { createOrUpdateQuestion } from "api/quizzes";
+import { useQuiz } from "providers/QuizProvider";
 
 const QuizQuestions = ({ quiz, setQuiz }) => {
+  const { addQuizQuestion, replaceQuizQuestion } = useQuiz();
   const { questions } = quiz;
   const hasNoQuestion = questions.length === 0;
 
@@ -33,6 +36,23 @@ const QuizQuestions = ({ quiz, setQuiz }) => {
       questions: replaceByIndex(questions, idx, newQuestion),
     });
 
+  const onSaveQuestion = async (index) => {
+    try {
+      const question = questions[index],
+        isNew = question.id === -1,
+        { data: newQuestion } = await createOrUpdateQuestion({
+          ...questions[index],
+          quiz_id: quiz.id,
+        });
+
+      setQuestion(index, newQuestion);
+
+      if (isNew) addQuizQuestion(quiz, newQuestion);
+      else replaceQuizQuestion(quiz, newQuestion);
+      return newQuestion;
+    } catch (error) {}
+  };
+
   return (
     <Flex padding="20px" direction="column" alignItems="center">
       <Heading as="h4" size="md" mb={8}>
@@ -53,7 +73,7 @@ const QuizQuestions = ({ quiz, setQuiz }) => {
               question={question}
               setQuestion={(newQuestion) => setQuestion(index, newQuestion)}
               onDelete={() => console.log("delete")}
-              onSave={() => console.log("save")}
+              onSave={onSaveQuestion}
             />
           ))
         )}

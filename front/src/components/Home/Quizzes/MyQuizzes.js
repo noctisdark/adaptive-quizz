@@ -1,16 +1,17 @@
-import { useUser } from "providers/UserProvider";
-
 import QuizzesContainer from "./QuizzesContainer";
 
+import { useQuiz } from "providers/QuizProvider";
+
 const MyQuizzes = () => {
-  const { quizzes = [] } = useUser();
+  const { myQuizzes } = useQuiz();
 
   return (
     <QuizzesContainer
       id="my-quizzes"
       title="My Quizzes"
-      quizzes={quizzes}
+      quizzes={myQuizzes}
       ifEmpty="Sorry, you don't have any quiz yet. maybe create one !"
+      canEdit
     />
   );
 };

@@ -12,21 +12,17 @@ import QuizBuiler from "components/QuizBuilder";
 const Home = () => {
   return (
     <UserProvider>
-      <Navigation />
-      <BasicLayout>
-        <Routes>
-          <Route path="/settings" Component={Settings} />
-          <Route path="/new" Component={QuizBuiler} />
-          <Route
-            path="/*"
-            element={
-              <QuizProvider>
-                <Quizzes />
-              </QuizProvider>
-            }
-          />
-        </Routes>
-      </BasicLayout>
+      <QuizProvider>
+        <Navigation />
+        <BasicLayout>
+          <Routes>
+            <Route path="/settings" Component={Settings} />
+            <Route path="/new" Component={QuizBuiler} />
+            <Route path="/edit/:id" Component={QuizBuiler} />
+            <Route path="/*" element={<Quizzes />} />
+          </Routes>
+        </BasicLayout>
+      </QuizProvider>
     </UserProvider>
   );
 };

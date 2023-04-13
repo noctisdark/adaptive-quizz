@@ -2,7 +2,7 @@ import { Heading, Box, Text, Flex } from "@chakra-ui/react";
 
 import QuizCard from "./QuizCard";
 
-const QuizzesContainer = ({ title, quizzes, ifEmpty, ...props }) => (
+const QuizzesContainer = ({ title, quizzes, ifEmpty, canEdit, ...props }) => (
   <Box minH="200px" {...props}>
     <Heading as="h3" fontSize="1.75em">
       {title}
@@ -10,7 +10,7 @@ const QuizzesContainer = ({ title, quizzes, ifEmpty, ...props }) => (
     <Flex flexFlow="row wrap" gap={8} padding="20px">
       {quizzes.length ? (
         quizzes.map((quiz, index) => (
-          <QuizCard quiz={quiz} key={quiz.id || index} />
+          <QuizCard quiz={quiz} key={quiz.id || index} canEdit={canEdit}/>
         ))
       ) : (
         <Text as="i" color="gray">

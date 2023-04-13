@@ -2,7 +2,6 @@ import { createContext, useEffect, useContext, useState } from "react";
 
 import LoadingScreen from "components/basics/LoadingScreen";
 import ErrorScreen from "components/basics/ErrorScreen";
-import api from "api";
 import { useJWT } from "hooks/authentication";
 import { getCurrentUser } from "api/users";
 import { toast } from "./ToastProvider";
@@ -36,8 +35,7 @@ const UserProvider = ({ children }) => {
     setTimeout(() => history.replace(nextURL), duration);
   };
 
-  const updateImage = (url) =>
-    setUser({ ...user, imageURL: api.defaults.baseURL + url });
+  const updateImage = (imageURL) => setUser({ ...user, imageURL });
 
   const updateUsername = (username) => setUser({ ...user, username });
 
@@ -46,8 +44,6 @@ const UserProvider = ({ children }) => {
       (async () => {
         try {
           const { data: user } = await getCurrentUser();
-          if (user.imageURL)
-            user.imageURL = api.defaults.baseURL + user.imageURL;
           setUser(user);
         } catch (error) {
           setError(error.response?.data || "Unexpected error.");

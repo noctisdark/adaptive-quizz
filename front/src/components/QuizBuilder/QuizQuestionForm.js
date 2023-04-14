@@ -23,26 +23,28 @@ import { CheckIcon, WarningIcon, WarningTwoIcon } from "@chakra-ui/icons";
 
 import { useUser } from "providers/UserProvider";
 
-const difficultyLevels = [
+export const difficultyLevels = [
   { value: 10, label: "Easy", colorScheme: "green" },
   { value: 20, label: "Medium", colorScheme: "orange" },
   { value: 30, label: "Hard", colorScheme: "red" },
 ];
 
-const idxToLetter = [0, "A", "B", "C", "D"];
+export const idxToLetter = [0, "A", "B", "C", "D"];
 
 const AddonButton = styled(Button)`
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 `;
 
-const TagDifficulty = ({ difficulty, isActive, onDiffucultyChange }) => {
+export const TagDifficulty = ({ difficulty, isActive, onDiffucultyChange }) => {
   return (
     <Tag
       colorScheme={difficulty.colorScheme}
       cursor="pointer"
       variant={isActive ? "solid" : "subtle"}
-      onClick={() => onDiffucultyChange(difficulty.value)}
+      onClick={
+        onDiffucultyChange && (() => onDiffucultyChange(difficulty.value))
+      }
     >
       <TagLabel>{difficulty.label}</TagLabel>
     </Tag>
@@ -119,7 +121,7 @@ const QuizQuestionForm = ({
   let formError = checkQuestionError(quiz, question);
 
   return (
-    <Card variant="elevated">
+    <Card variant="elevated" w="xl">
       <CardBody padding={0}>
         <Box
           backgroundImage={quiz.backgroundURL}
@@ -129,10 +131,10 @@ const QuizQuestionForm = ({
           display="flex"
           alignItems="flex-end"
           justifyContent="flex-end"
-          w="xl"
+          maxW="100%"
           minH="100px"
         >
-          <Text as="p" p={1} backgroundColor="#ffffff9f">
+          <Text as="p" p={1} backgroundColor="#ffffff9f" color="gray.900">
             <Text as="b">{quiz.title}</Text> By{" "}
             <Text as="i">@{user.username}</Text>
           </Text>

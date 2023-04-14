@@ -14,11 +14,20 @@ class User(db.Model):
   quizzes = db.relationship('Quiz', backref='author', lazy=True) # Keep even if user is deleted
   quiz_sessions = db.relationship('QuizSession', backref='user', lazy=True, cascade="all, delete-orphan")
 
-  def can_see_quiz(self, quiz):
+  def can_see_quiz_answers(self, quiz):
     return quiz.author_id == self.id
-
+  
   def can_modify_quiz(self, quiz):
-    return self.can_see_quiz(quiz)
+    return self.can_see_quiz_details(quiz)
+  
+  def can_play_quiz(self, quiz):
+    return quiz.public
+  
+  def can_see_quiz_session(self, quiz_session):
+    return quiz_session.user_id == self.id or quiz_session.quiz.author_id == self.id
+
+  def can_edit_quiz_session(self, quiz_session):
+    return self.can_see_quiz_session(quiz_session)
 
 # Create table if it doesn't exist
 with app.app_context():

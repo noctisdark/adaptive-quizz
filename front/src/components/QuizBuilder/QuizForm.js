@@ -149,7 +149,7 @@ const QuizForm = ({ quiz }) => {
       <Heading as="h4" size="md" mb={8}>
         Quiz description
       </Heading>
-      <Card variant="elevated" w="xl" maxW="100%">
+      <Card variant="elevated" w="xl">
         <CardBody padding={0} {...getRootProps()}>
           <input {...getInputProps()} />
           <LoadingOverlay when={isLoading} opacity={1}>
@@ -163,7 +163,7 @@ const QuizForm = ({ quiz }) => {
               justifyContent="center"
               minH="sm"
             >
-              <Text background="gray.100" opacity={0.5}>
+              <Text background="gray.100" color="gray.900" opacity={0.75}>
                 {error ? (
                   <Text color="red">
                     <WarningIcon /> {error}

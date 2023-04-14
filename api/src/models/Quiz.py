@@ -52,7 +52,7 @@ def question_to_dict(user, question):
   }
 
   # !TODO!: Investigate the impact of this later
-  if user.can_see_quiz(question.quiz): data["answer"] = question.answer
+  if user.can_see_quiz_answers(question.quiz): data["answer"] = question.answer
   return data;
 
 def quiz_to_dict(user, quiz):
@@ -143,34 +143,22 @@ def delete_question(user, question_id):
   return {"error": None}
 
 def harder_than(difficulty):
-  quizzes = Quizz.query.filter(Quizz.difficulty >= difficulty)
-  quizz = random.choice(list(quizzes))
-  if not quizz:
-    return {"error": "Quizz Not Found"}
-  return {"error": None, "quizz": quizz_to_dict(quizz)}
+  relevant_questions = Question.query.filter(Quiz.difficulty >= difficulty)
+  question = random.choice(list(relevant_questions))
+  if not question:
+    return {"error": "No such question."}
+  return {"error": None, "question": question_to_dict(question)}
 
 def easier_than(difficulty):
-  quizzes = Quizz.query.filter(Quizz.difficulty <= difficulty)
-  quizz = random.choice(list(quizzes))
-  if not quizz:
-    return {"error": "Quizz Not Found"}
-  return {"error": None, "quizz": quizz_to_dict(quizz)}
+  relevant_questions = Question.query.filter(Quiz.difficulty <= difficulty)
+  question = random.choice(list(relevant_questions))
+  if not question:
+    return {"error": "No such question."}
+  return {"error": None, "question": question_to_dict(question)}
 
-def transition(quizz, answer):
-  iscorrect = quizz.answer == answer
-  if iscorrect:
-    return harder_than(quizz.difficulty)
+def transition(question, answer):
+  is_correct = question.answer == answer
+  if is_correct:
+    return harder_than(question.difficulty)
   else:
-    return easier_than(quizz.difficulty)
-
-
-def db_add_quizz(quizz):
-  db.session.add(quizz)
-  db.session.commit()
-  return {"error": None}
-
-def db_del_quizz(quizz):
-  db.session.delete(quizz) 
-  db.session.commit()
-  return {"error": None}
-
+    return easier_than(question.difficulty)

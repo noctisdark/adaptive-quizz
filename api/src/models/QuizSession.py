@@ -1,4 +1,5 @@
 import datetime
+import random
 from sqlalchemy.orm import joinedload
 from base import app, db
 #from sqlalchemy.orm import joinedload
@@ -12,6 +13,7 @@ class QuizSession(db.Model):
   user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
   quiz_id = db.Column(db.Integer, db.ForeignKey('quizzes.id'), nullable=False)
   score = db.Column(db.Integer, default=0)
+  skill_level = db.Column(db.Integer, default=0)
   start_time = db.Column(db.DateTime, default=datetime.datetime.utcnow)
   completed = db.Column(db.Boolean, default=False)
   last_question_id = db.Column(db.Integer, db.ForeignKey('questions.id'), nullable=True, default=None)
@@ -55,24 +57,20 @@ def create(user, quiz_id):
   db.session.commit()
   return {"error": None, "quiz_session": quiz_session_to_dict(user, quiz_session)}
 
+# The idea was to compute/analyze stuff when session is finished
+# Now computing score is done in real time so this method only cleans up the
+# quiz_session, open to ideas.
 def conclude(quiz_session):
   if quiz_session.completed: return
-  score = 0
-  for answer in quiz_session.answers:
-    # answer.question should be in the identity map
-    if answer.answer == answer.question.answer:
-      score += answer.question.difficulty
-  
-  quiz_session.score = score
   quiz_session.completed = True
   quiz_session.last_question_id = None
   db.session.commit()
 
-
 def complete(user, quiz_session_id):
   quiz_session = QuizSession.query.options(
-    joinedload(QuizSession.answers),
-    joinedload(QuizSession.quiz).joinedload(Quiz.questions)
+## No need to join anything given the current state of affairs
+#    joinedload(QuizSession.answers),
+#    joinedload(QuizSession.quiz).joinedload(Quiz.questions)
   ).get(quiz_session_id)
 
   if not user.can_edit_quiz_session(quiz_session):
@@ -91,20 +89,25 @@ def next_question(user, quiz_session_id, quiz_session = None):
   if not user.can_edit_quiz_session(quiz_session): {"error": "You cannot interfere others' quiz sessions."}
   if quiz_session.completed: return {"error": None, "quiz_session": quiz_session_to_dict(user, quiz_session)}
 
-  answered_questions_ids = set([answer.question_id for answer in quiz_session.answers])
-  next_question = None
-  for question in quiz_session.quiz.questions:
-    if not question.id in answered_questions_ids:
-      next_question = question
-      break 
-
-  if not next_question:
+  skill_level = quiz_session.skill_level
+  quiz = quiz_session.quiz
+  all_questions = quiz.questions
+  answered_questions = [answer.question for answer in quiz_session.answers]
+  remaining_questions = list(set(all_questions) - set(answered_questions))
+  
+  # Maybe also stop the quiz when the skill_level reaches a certain level
+  # See with Sougou
+  if not remaining_questions:
     conclude(quiz_session)
     return {"error": None, "quiz_session": quiz_session_to_dict(user, quiz_session)}
-  else:
-    quiz_session.last_question_id = next_question.id
-    db.session.commit()
-    return {"error": None, "next_question": question_to_dict(user, next_question)}
+
+  weights = [1 / (1 + abs(q.difficulty - skill_level)) for q in remaining_questions]
+  next_question = random.choices(remaining_questions, weights=weights)[0]
+  #app.logger.log(10, f"Skill level is {skill_level} and weights are now: {weights}")
+
+  quiz_session.last_question_id = next_question.id
+  db.session.commit()
+  return {"error": None, "next_question": question_to_dict(user, next_question)}
 
 def answer_question(user, quiz_session_id, answer):
   quiz_session = QuizSession.query.options(
@@ -112,6 +115,7 @@ def answer_question(user, quiz_session_id, answer):
     joinedload(QuizSession.quiz).joinedload(Quiz.questions)
   ).get(quiz_session_id)
 
+  # Move to the controller
   if not quiz_session: return {"error": "No such quiz session."}
   if quiz_session.completed: return {"error": "Quiz session ended."}
   if not user.can_edit_quiz_session(quiz_session): {"error": "You cannot answer on others' quiz sessions."}
@@ -119,4 +123,21 @@ def answer_question(user, quiz_session_id, answer):
   quiz_session_answer = QuizSessionAnswer(quiz_session_id=quiz_session_id, question_id=quiz_session.last_question_id, answer=answer)
   db.session.add(quiz_session_answer)
   db.session.commit()
+
+  # Adjust the skill level
+  adjust_skill_level(quiz_session, quiz_session_answer.question, answer)
   return next_question(user, quiz_session_id, quiz_session)
+
+def adjust_skill_level(quiz_session, question, answer):
+  skill_level = quiz_session.skill_level
+  if answer == question.answer:
+    skill_level += 1.0 + 0.5 * max(question.difficulty - skill_level, 0)
+    quiz_session.score += question.difficulty
+  else:
+    skill_difference = skill_level - question.difficulty
+    skill_level -= 2.0
+    if skill_difference > 0:  skill_level -= 0.5 * skill_difference
+    if skill_level < 0: skill_level = 0
+
+  quiz_session.skill_level = skill_level; 
+  db.session.commit()

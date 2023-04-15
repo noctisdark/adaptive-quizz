@@ -47,6 +47,7 @@ def delete_quiz(current_user, id):
 @app.route('/questions', methods=['POST'])
 @token_required
 def create_question(current_user):
+  app.logger.log(10, "UPDATE QUESTION")
   result = Quiz.create_question(current_user, request.json["quizId"], request.json)
   if not result["error"]:
     question = result["question"]

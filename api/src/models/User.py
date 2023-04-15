@@ -18,7 +18,7 @@ class User(db.Model):
     return quiz.author_id == self.id
   
   def can_modify_quiz(self, quiz):
-    return self.can_see_quiz_details(quiz)
+    return quiz.author_id == self.id
   
   def can_play_quiz(self, quiz):
     return quiz.public

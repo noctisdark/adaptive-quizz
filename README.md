@@ -16,7 +16,7 @@ The back-end of the application runs on `http://localhost:5000`, and the front-e
 
 ## Architecture
 
-The front-end of the application is built using Preact, a lightweight alternative to React. It communicates with the back-end API built with Flask, which serves as the data layer for the application. The back-end uses SQLite as its database, allowing for easy setup and deployment.
+The front-end of the application is built using React. It communicates with the back-end API built with Flask, which serves as the data layer for the application. The back-end uses SQLite as its database, allowing for easy setup and deployment.
 
 As the project is still in its early stages, there are currently no complex architecture patterns in use. However, the code is well-commented and includes hints for future architecture decisions.
 

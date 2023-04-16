@@ -19,9 +19,9 @@ const QuizProvider = ({ children }) => {
   const { user } = useUser();
   const [error, setError] = useState(false);
   const [quizzes, setQuizzes] = useState(null);
-  const [othersQuizzes, myQuizzes] = extractIf(
+  const [myQuizzes, othersQuizzes] = extractIf(
     quizzes || [],
-    (quiz) => quiz.author_id !== user.id
+    (quiz) => quiz.authorId !== user.id
   );
 
   const addQuiz = (quiz) => setQuizzes(concat(quizzes, quiz));

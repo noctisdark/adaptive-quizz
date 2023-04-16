@@ -11,6 +11,7 @@ import When from "components/basics/When";
 
 import { authenticated } from "hooks/authentication";
 import { ToastContainer } from "providers/ToastProvider";
+import AppPresentation from "components/AppPresentation";
 
 const AdaptiveQuiz = () => (
   <React.StrictMode>
@@ -37,7 +38,7 @@ const AdaptiveQuiz = () => (
               />
             }
           />
-          <Route path="/" element={"Hello world"} />
+          <Route path="*" Component={AppPresentation} />
         </Routes>
       </UIProvider>
     </RouterProvider>

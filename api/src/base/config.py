@@ -1,4 +1,6 @@
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 development = True if os.getenv('ENV') == 'development' else False
 print("developement:", development)

@@ -7,9 +7,6 @@ services:
       - ./api:/api
     environment:
       - FLASK_APP=/api/src/main.py
-      - ENV=development
-      - FLASK_DEBUG=true
-      - SECRET_KEY=929faab4edce0be7cdfdf935899ffcac
     ports:
       - 5000:5000
 

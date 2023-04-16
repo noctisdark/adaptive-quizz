@@ -109,7 +109,6 @@ def next_question(user, quiz_session_id, quiz_session = None):
 
   weights = [1 / (1 + abs((q.difficulty - skill_level) / SELECTION_SPREAD)) for q in remaining_questions]
   next_question = random.choices(remaining_questions, weights=weights)[0]
-  app.logger.log(10, f"Skill level is {skill_level} and weights are now: {weights}")
 
   quiz_session.last_question_id = next_question.id
   db.session.commit()

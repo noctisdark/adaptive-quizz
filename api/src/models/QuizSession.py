@@ -79,6 +79,12 @@ def complete(user, quiz_session_id):
   conclude(quiz_session)
   return {"error": None, "quiz_session": quiz_session_to_dict(user, quiz_session)}
 
+CORRECT_ANSWER_BONUS = 3.0
+WRONG_ANSWER_PENALTY = 2.0
+CORRECT_ANSWER_BONUS_PER_DIFFICULTY = 0.5
+WRONG_ANSWER_PENALTY_PER_DIFFICULTY = 0.3
+SELECTION_SPREAD = 3
+
 def next_question(user, quiz_session_id, quiz_session = None):
   quiz_session = quiz_session or QuizSession.query.options(
     joinedload(QuizSession.answers),
@@ -101,9 +107,9 @@ def next_question(user, quiz_session_id, quiz_session = None):
     conclude(quiz_session)
     return {"error": None, "quiz_session": quiz_session_to_dict(user, quiz_session)}
 
-  weights = [1 / (1 + abs(q.difficulty - skill_level)) for q in remaining_questions]
+  weights = [1 / (1 + abs((q.difficulty - skill_level) / SELECTION_SPREAD)) for q in remaining_questions]
   next_question = random.choices(remaining_questions, weights=weights)[0]
-  #app.logger.log(10, f"Skill level is {skill_level} and weights are now: {weights}")
+  app.logger.log(10, f"Skill level is {skill_level} and weights are now: {weights}")
 
   quiz_session.last_question_id = next_question.id
   db.session.commit()
@@ -130,13 +136,13 @@ def answer_question(user, quiz_session_id, answer):
 
 def adjust_skill_level(quiz_session, question, answer):
   skill_level = quiz_session.skill_level
+  skill_difference = skill_level - question.difficulty
   if answer == question.answer:
-    skill_level += 1.0 + 0.5 * max(question.difficulty - skill_level, 0)
+    skill_level += CORRECT_ANSWER_BONUS + CORRECT_ANSWER_BONUS_PER_DIFFICULTY * max(-skill_difference, 0)
     quiz_session.score += question.difficulty
   else:
-    skill_difference = skill_level - question.difficulty
-    skill_level -= 2.0
-    if skill_difference > 0:  skill_level -= 0.5 * skill_difference
+    skill_level -= WRONG_ANSWER_PENALTY
+    skill_level -= WRONG_ANSWER_PENALTY_PER_DIFFICULTY  * max(skill_level, 0)
     if skill_level < 0: skill_level = 0
 
   quiz_session.skill_level = skill_level; 

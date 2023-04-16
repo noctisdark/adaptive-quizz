@@ -31,25 +31,30 @@ const QuizProvider = ({ children }) => {
   const removeQuiz = (quiz) => setQuizzes(deleteById(quizzes, quiz.id));
 
   const addQuizQuestion = (quiz, question) =>
-    replaceById(quizzes, quiz.id, {
-      ...quiz,
-      questions: concat(quiz.questions, question),
-    });
+    setQuizzes(
+      replaceById(quizzes, quiz.id, {
+        ...quiz,
+        questions: concat(quiz.questions, question),
+      })
+    );
 
   const replaceQuizQuestion = (quiz, question) =>
-    replaceById(quizzes, quiz.id, {
-      ...quiz,
-      questions: replaceById(quiz.questions, question.id, question),
-    });
-
+    setQuizzes(
+      replaceById(quizzes, quiz.id, {
+        ...quiz,
+        questions: replaceById(quiz.questions, question.id, question),
+      })
+    );
   const removeQuizQuestion = (quiz, index) =>
-    replaceById(quizzes, quiz.id, {
-      ...quiz,
-      questions: deleteByIndex(quiz.questions, index),
-    });
-  
+    setQuizzes(
+      replaceById(quizzes, quiz.id, {
+        ...quiz,
+        questions: deleteByIndex(quiz.questions, index),
+      })
+    );
+
   const getQuizById = (id) => quizzes.find((quiz) => quiz.id === id);
-  
+
   useEffect(() => {
     (async () => {
       try {

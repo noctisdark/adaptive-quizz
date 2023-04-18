@@ -5,7 +5,8 @@ FROM node:19-alpine3.16
 WORKDIR /front
 
 # Install dependencies, if any
-COPY package*.json .
+COPY package.json .
+COPY package-lock.json .
 RUN npm install
 
 # Expose this port

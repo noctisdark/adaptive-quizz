@@ -1,6 +1,25 @@
 # Adaptive Quiz
 
 Adaptive Quiz is a web application that helps teachers design adaptive quizzes on a given subject, the questions presented to students can evolve according to the answers given during the assesment.
+### Register 
+![register](https://github.com/noctisdark/adaptive-quizz/assets/88320615/197898bc-1edc-4831-afb4-13b24f308801)
+
+### Choose a quiz to play
+![play_quizzes](https://github.com/noctisdark/adaptive-quizz/assets/88320615/f9979f15-d091-46f4-96b6-1bcce2f75a6e)
+
+### Play a quiz
+![play_a_quiz](https://github.com/noctisdark/adaptive-quizz/assets/88320615/61cd49d6-5f3c-4f07-a557-9f4355f292a4)
+
+
+### Get evaluated
+![quiz_evaluation](https://github.com/noctisdark/adaptive-quizz/assets/88320615/4e8ef87c-cc05-426a-91c6-08f6ebdc3a2e)
+
+### Create your own quiz
+![create_new_quiz](https://github.com/noctisdark/adaptive-quizz/assets/88320615/a103e016-a8da-4b02-9855-26a9e1263e38)
+
+### Update your quizzes
+![add_new_questions](https://github.com/noctisdark/adaptive-quizz/assets/88320615/55163ed7-54b5-40e8-bacb-c223b85da638)
+
 
 ## Development Flow
 
